@@ -3,7 +3,9 @@
 > 把每一块钱和每一分积分都花在刀刃上：进门之前算一笔，出门之后算一笔。
 > 基于麦当劳官方 MCP（mcd-order）的麦当劳消费决策副驾驶 —— 点餐 · 积分 · 优惠券，全链路算账。
 
-![demo](docs/demo.gif) <!-- TODO: 演示 GIF，发布前替换 -->
+![麦门炼金术](docs/assets/banner.png)
+
+**对话即分析 · 每日简报主动找你 · 在线 demo 可玩** —— 一个开源的麦当劳个人消费 Copilot。
 
 ## 两个反直觉的发现
 
@@ -86,6 +88,12 @@
 给我出今天的麦麦情报简报。
 ```
 
+## WorkBuddy 用户？三步零代码复刻
+
+本项目在 **WorkBuddy**（腾讯，本次大赛官方合作伙伴）中开发与验证。用 WorkBuddy 的话，
+**不需要 GitHub Actions、不需要配任何 Secrets**：连接器 + Skill + 内置自动化三步搞定，
+每天 08:00 的「今日麦麦情报」直接出现在会话里。完整步骤见 [`workbuddy-setup.md`](./workbuddy-setup.md)。
+
 ## 设计原则
 
 1. **消耗型操作三重确认**——抽奖/兑换/下单前，先展示"花多少、换什么"，你点头才执行。
@@ -109,11 +117,15 @@ mcd-alchemy/
 ├── MCP_INTEGRATION.md               # MCP 工具集成与调用流程
 ├── mcp-config.example.json          # 脱敏 MCP 配置（环境变量占位符）
 ├── skills/mcd-alchemy/SKILL.md      # Skill 主体（五大模块分析框架）
+├── workbuddy-setup.md               # WorkBuddy 用户零代码复刻指南
 ├── demo/index.html                  # 交互演示页（GitHub Pages 托管）
 ├── automation/                      # 每日简报自动化（Actions + 多平台 webhook）
 │   ├── daily-brief.mjs              # 主脚本：MCP 数据采集 + Open-Meteo 天气 + 四通道推送
 │   ├── README.md                    # 配置指南（Secrets / webhook 教程）
 │   └── .env.example                 # 本地调试环境变量模板
+├── docs/
+│   ├── assets/banner.png            # 项目 banner
+│   └── data-snapshots/              # 接口数据快照（可复现）
 └── .github/workflows/
     ├── daily-brief.yml              # 定时任务：北京时间每日 08:00
     └── pages.yml                    # demo 页自动部署 GitHub Pages
