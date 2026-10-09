@@ -1,0 +1,21 @@
+# 环境与密钥（绝不能提交真实 Token）
+.env
+.env.*
+*.local.json
+mcp-config.json
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+__pycache__/
+
+# 临时素材
+*.tmp
+docs/_drafts/

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麦门积分炼金术 · 交互演示</title>
+<style>
+  :root {
+    --red: #DA291C;
+    --yellow: #FFC72C;
+    --ink: #26221F;
+    --sub: #6B655F;
+    --line: #ECE7E0;
+    --bg: #FBF8F4;
+    --card: #FFFFFF;
+    --green: #1D9E75;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
+  header { padding: 40px 0 24px; }
+  .tag { display: inline-block; background: var(--yellow); color: var(--ink); font-size: 13px; font-weight: 600; padding: 3px 12px; border-radius: 999px; margin-bottom: 14px; }
+  h1 { font-size: 34px; font-weight: 800; letter-spacing: 0.5px; }
+  h1 .gold { color: var(--red); }
+  .subtitle { color: var(--sub); font-size: 15px; margin-top: 8px; }
+  .snapshot { display: inline-block; margin-top: 12px; font-size: 12.5px; color: var(--sub); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; }
+  h2 { font-size: 21px; font-weight: 700; margin: 44px 0 6px; }
+  h2 .no { color: var(--red); margin-right: 8px; }
+  .desc { color: var(--sub); font-size: 14px; margin-bottom: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+
+  /* hero */
+  .hero { background: linear-gradient(135deg, #FFF6DE 0%, #FFFFFF 60%); border: 1.5px solid #F2DFAE; }
+  .hero-big { font-size: 52px; font-weight: 800; color: var(--red); line-height: 1.1; }
+  .hero-big small { font-size: 18px; color: var(--ink); font-weight: 600; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+  .bar-label { width: 130px; font-size: 13px; color: var(--sub); flex-shrink: 0; }
+  .bar-track { flex: 1; height: 26px; background: #F4EFE8; border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; color: #fff; font-size: 12.5px; font-weight: 600; }
+  .verdict { margin-top: 14px; background: #EAF6F0; border: 1px solid #BFE3D4; color: #0B6B4F; border-radius: 10px; padding: 10px 14px; font-size: 14px; font-weight: 600; }
+  .fine { font-size: 12px; color: var(--sub); margin-top: 10px; }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; color: var(--sub); font-weight: 600; padding: 8px 10px; border-bottom: 1.5px solid var(--line); white-space: nowrap; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  tr:last-child td { border-bottom: none; }
+  .num { font-variant-numeric: tabular-nums; }
+  .pill { display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 999px; font-weight: 600; }
+  .pill-ok { background: #EAF6F0; color: #0B6B4F; }
+  .pill-coupon { background: #FDEEEE; color: var(--red); }
+  .rate-bar { display: flex; align-items: center; gap: 8px; }
+  .rate-track { width: 120px; height: 8px; background: #F4EFE8; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+  .rate-fill { height: 100%; background: var(--red); border-radius: 4px; }
+
+  /* simulator */
+  .sim-btn { background: var(--red); color: #fff; border: none; font-size: 15px; font-weight: 700; padding: 12px 28px; border-radius: 12px; cursor: pointer; }
+  .sim-btn:hover { background: #B91F14; }
+  .sim-btn:disabled { background: #D8CFC5; cursor: not-allowed; }
+  .sim-result { margin-top: 16px; min-height: 56px; }
+  .sim-prize { font-size: 18px; font-weight: 700; }
+  .sim-prize .win { color: var(--red); }
+  .sim-ledger { display: flex; gap: 24px; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 13.5px; color: var(--sub); flex-wrap: wrap; }
+  .sim-ledger b { color: var(--ink); font-size: 16px; }
+  .sim-note { font-size: 12px; color: var(--sub); margin-top: 12px; }
+
+  /* health card */
+  .hp { display: flex; gap: 16px; flex-wrap: wrap; }
+  .hp-item { flex: 1; min-width: 140px; background: #FAF6EF; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .hp-item .k { font-size: 12.5px; color: var(--sub); }
+  .hp-item .v { font-size: 24px; font-weight: 800; margin-top: 2px; }
+  .hp-item.warn { background: #FDF1EC; border-color: #F3D2C4; }
+  .hp-item.warn .v { color: var(--red); }
+
+  /* calendar */
+  .tl { border-left: 2px solid var(--line); margin-left: 8px; padding-left: 20px; }
+  .tl-item { position: relative; padding-bottom: 18px; }
+  .tl-item::before { content: ""; position: absolute; left: -27px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--yellow); border: 2px solid #fff; box-shadow: 0 0 0 1.5px var(--yellow); }
+  .tl-date { font-size: 12.5px; font-weight: 700; color: var(--red); }
+  .tl-title { font-size: 14.5px; font-weight: 600; }
+  .tl-sub { font-size: 13px; color: var(--sub); }
+
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--sub); }
+  a { color: var(--red); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="tag">程序员节参赛作品 · 演示页</div>
+  <h1>麦门<span class="gold">积分炼金术</span></h1>
+  <div class="subtitle">把麦当劳积分当资产管：不浪费每一分，不乱抽每一次。基于麦当劳官方 MCP 实时数据。</div>
+  <div class="snapshot">数据快照：2026-10-09 真实接口返回 · 账户数据已脱敏 · 演示无需登录</div>
+</header>
+
+<!-- ① 保底发现 -->
+<h2><span class="no">①</span>抽奖保底分析</h2>
+<div class="desc">抽奖前先算账。这是积分抽奖的真实成本与奖池下限：</div>
+<div class="card hero">
+  <div style="font-size:14px; color:var(--sub);">单次抽奖成本 <b style="color:var(--ink)">24 积分</b>，公开奖池中价值最低的奖品：</div>
+  <div class="hero-big">30 积分 <small>（保底奖品）</small></div>
+  <div class="bar-row">
+    <div class="bar-label">成本</div>
+    <div class="bar-track"><div class="bar-fill" style="width:80%; background:#B8AFA4;">24 积分</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">保底奖品价值</div>
+    <div class="bar-track"><div class="bar-fill" style="width:100%; background:var(--green);">30 积分</div></div>
+  </div>
+  <div class="verdict">结论：按当前公开奖池，抽一次最差净赚 6 积分，其余 9 项奖品全是真实优惠券 → 保底不亏，可抽。</div>
+  <div class="fine">口径说明：官方未公示各奖品概率，"保底"指公开奖池最低价值项与成本的差值推断，非收益承诺；券类奖品价值需触发消费后兑现。</div>
+</div>
+
+<!-- ② 模拟器 -->
+<h2><span class="no">②</span>抽奖模拟器（不花真积分）</h2>
+<div class="desc">均匀随机模拟公开奖池，累计账本帮你直观感受"保底"的含义。非官方概率，仅供演示。</div>
+<div class="card">
+  <button class="sim-btn" id="drawBtn" onclick="draw()">模拟抽一次</button>
+  <button class="sim-btn" id="resetBtn" onclick="resetSim()" style="background:#B8AFA4; margin-left:10px;">清零</button>
+  <div class="sim-result" id="simResult"><div style="color:var(--sub); font-size:14px;">点击按钮开始模拟 →</div></div>
+  <div class="sim-ledger">
+    <span>已模拟 <b id="cnt">0</b> 次</span>
+    <span>累计成本 <b id="cost">0</b> 积分</span>
+    <span>累计奖品等值 <b id="gain">0</b> 积分（按标尺折算）</span>
+    <span>净收益 <b id="net" style="color:var(--green)">+0</b></span>
+  </div>
+  <div class="sim-note">等值口径：积分奖按面值；优惠券按"积分标尺 0.0274 元/分"折算券面省钱额（如立减 3 元券 ≈ 109 积分等值）。券需消费兑现，价值实现以你真实下单为准。</div>
+</div>
+
+<!-- ③ 奖池明细 -->
+<h2><span class="no">③</span>公开奖池明细</h2>
+<div class="desc">2026-10-09 实测返回的完整奖池（10 项）：</div>
+<div class="card" style="padding:12px 16px;">
+  <table>
+    <tr><th>奖品</th><th>类型</th><th>标尺等值（积分）</th><th>对比成本 24</th></tr>
+    <tr><td>麦辣三件套 5 折券</td><td><span class="pill pill-coupon">优惠券</span></td><td class="num">≈ 620</td><td class="num" style="color:var(--green); font-weight:700;">+596</td></tr>
+    <tr><td>板烧三件套 5 折券</td><td><span class="pill pill-coupon">优惠券</span></td><td class="num">≈ 620</td><td class="num" style="color:var(--green); font-weight:700;">+596</td></tr>
+    <tr><td>双层鳕鱼三件套 6 折券</td><td><span class="pill pill-coupon">优惠券</span></td><td class="num">≈ 372</td><td class="num" style="color:var(--green); font-weight:700;">+348</td></tr>
+    <tr><td>甜辣小食组合 5 折券</td><td><span class="pill pill-coupon">优惠券</span></td><td class="num">≈ 277</td><td class="num" style="color:var(--green); font-weight:700;">+253</td></tr>
+    <tr><td>小食四件套 5.5 折券</td><td><span class="pill pill-coupon">优惠券</span></td><td class="num">≈ 188</td><td class="num" style="color:var(--green); font-weight:700;">+164</td></tr>
+    <tr><td>麦旋风 5 折券</td><td><span class="pill pill-coupon">优惠券</span></td><td class="num">≈ 188</td><td class="num" style="color:var(--green); font-weight:700;">+164</td></tr>
+    <tr><td>下单立减 3 元券</td><td><span class="pill pill-coupon">优惠券</span></td><td class="num">≈ 109</td><td class="num" style="color:var(--green); font-weight:700;">+85</td></tr>
+    <tr><td>下单立减 2 元券</td><td><span class="pill pill-coupon">优惠券</span></td><td class="num">≈ 73</td><td class="num" style="color:var(--green); font-weight:700;">+49</td></tr>
+    <tr><td>下单立减 1 元券</td><td><span class="pill pill-coupon">优惠券</span></td><td class="num">≈ 37</td><td class="num" style="color:var(--green); font-weight:700;">+13</td></tr>
+    <tr><td>30 积分</td><td><span class="pill pill-ok">积分奖</span></td><td class="num">30</td><td class="num" style="color:var(--green); font-weight:700;">+6（保底）</td></tr>
+  </table>
+  <div class="fine" style="padding:10px 10px 2px;">折算假设：5 折券按约 34 元三件套省 17 元计；6 折按省 10.2 元计；积分标尺取 21.9 元巨无霸组合 / 800 积分 = 0.0274 元/分。以上为保守估算，仅用于横向比较。</div>
+</div>
+
+<!-- ④ 性价比榜 -->
+<h2><span class="no">④</span>积分商城性价比榜</h2>
+<div class="desc">统一"元/分"标尺后，商城商品第一次有了可比性（样本节选，价值率越高越值）：</div>
+<div class="card" style="padding:12px 16px;">
+  <table>
+    <tr><th>商品</th><th>所需积分</th><th>价值</th><th>价值率（元/分）</th></tr>
+    <tr><td>6.9 元香芋派/菠萝派任选</td><td class="num">50</td><td class="num">6.9 元</td><td><div class="rate-bar"><div class="rate-track"><div class="rate-fill" style="width:100%"></div></div><b>0.138</b></div></td></tr>
+    <tr><td>6.9 元可乐麦炫酷</td><td class="num">50</td><td class="num">6.9 元</td><td><div class="rate-bar"><div class="rate-track"><div class="rate-fill" style="width:100%"></div></div><b>0.138</b></div></td></tr>
+    <tr><td>10.9 元指定小食任选</td><td class="num">200</td><td class="num">10.9 元</td><td><div class="rate-bar"><div class="rate-track"><div class="rate-fill" style="width:39.5%"></div></div><b>0.0545</b></div></td></tr>
+    <tr><td>16.9 元麦辣可乐组合</td><td class="num">500</td><td class="num">16.9 元</td><td><div class="rate-bar"><div class="rate-track"><div class="rate-fill" style="width:24.6%"></div></div><b>0.0338</b></div></td></tr>
+    <tr><td>21.9 元巨无霸可乐组合</td><td class="num">800</td><td class="num">21.9 元</td><td><div class="rate-bar"><div class="rate-track"><div class="rate-fill" style="width:19.9%"></div></div><b>0.0274</b></div></td></tr>
+  </table>
+  <div class="fine" style="padding:10px 10px 2px;">规律：积分消耗门槛越低，价值率越高——小额定向券是"积分最优出口"。</div>
+</div>
+
+<!-- ⑤ 过期预警 -->
+<h2><span class="no">⑤</span>过期积分预警</h2>
+<div class="desc">积分是会过期的资产。示例账户（脱敏）的健康度报告：</div>
+<div class="card">
+  <div class="hp">
+    <div class="hp-item"><div class="k">可用积分</div><div class="v">1,027</div></div>
+    <div class="hp-item warn"><div class="k">本月将过期</div><div class="v">143</div></div>
+    <div class="hp-item"><div class="k">下月将过期</div><div class="v">0</div></div>
+    <div class="hp-item"><div class="k">累计已过期</div><div class="v">409</div></div>
+  </div>
+  <div class="verdict" style="background:#FDF1EC; border-color:#F3D2C4; color:#A33A20; margin-top:16px;">抢救方案（≤143 分全额消耗）：50 分派券 ×2 + 50 分可乐麦炫酷 ×1 + 剩余 43 分留着下月 —— 价值率 0.138 元/分，是巨无霸组合的 5 倍。</div>
+</div>
+
+<!-- ⑥ 活动日历 -->
+<h2><span class="no">⑥</span>十月活动日历（节选）</h2>
+<div class="desc">每天一张"麦麦情报简报"的数据源：</div>
+<div class="card">
+  <div class="tl">
+    <div class="tl-item"><div class="tl-date">10/08 - 10/21 工作日</div><div class="tl-title">9.9 元早餐两件套</div><div class="tl-sub">早餐堡 + 鲜萃咖啡，凭券两件套</div></div>
+    <div class="tl-item"><div class="tl-date">10/10</div><div class="tl-title">麦金喜抽奖 · 积分霸王餐</div><div class="tl-sub">免费龙焰鸡腿堡/麦辣鸡腿堡抽奖开启</div></div>
+    <div class="tl-item"><div class="tl-date">10/15</div><div class="tl-title">GD 联名徽章发售</div><div class="tl-sub">任意消费 +39.9 元，APP 积分抢先购 10:40</div></div>
+    <div class="tl-item"><div class="tl-date">10/22</div><div class="tl-title">联名限定丝巾发售</div><div class="tl-sub">周边第三弹</div></div>
+  </div>
+</div>
+
+<footer>
+  本页面为「麦门积分炼金术」参赛演示，由个人独立开发，非麦当劳官方产品；数据为 2026-10-09 接口快照，具有时效性，请以麦当劳官方渠道实时结果为准。抽奖概率未公示，所有折算与期望分析均为演示口径。<br>
+  Made with WorkBuddy × 麦当劳 MCP · <a href="https://github.com/">GitHub 仓库地址（发布后更新）</a>
+</footer>
+
+</div>
+
+<script>
+var POOL = [
+  { name: "麦辣三件套 5 折券", eq: 620 },
+  { name: "板烧三件套 5 折券", eq: 620 },
+  { name: "双层鳕鱼三件套 6 折券", eq: 372 },
+  { name: "甜辣小食组合 5 折券", eq: 277 },
+  { name: "小食四件套 5.5 折券", eq: 188 },
+  { name: "麦旋风 5 折券", eq: 188 },
+  { name: "下单立减 3 元券", eq: 109 },
+  { name: "下单立减 2 元券", eq: 73 },
+  { name: "下单立减 1 元券", eq: 37 },
+  { name: "30 积分", eq: 30 }
+];
+var COST = 24, cnt = 0, cost = 0, gain = 0;
+function draw() {
+  var p = POOL[Math.floor(Math.random() * POOL.length)];
+  cnt++; cost += COST; gain += p.eq;
+  var net = gain - cost;
+  document.getElementById("simResult").innerHTML =
+    '<div class="sim-prize">🎁 抽中：<span class="win">' + p.name + '</span>' +
+    '<span style="font-size:13px; color:var(--sub); font-weight:400;">（标尺等值 ≈ ' + p.eq + ' 积分）</span></div>' +
+    '<div style="font-size:13px; color:var(--sub); margin-top:4px;">本次净收益：' + (p.eq - COST >= 0 ? "+" : "") + (p.eq - COST) + ' 积分等值</div>';
+  document.getElementById("cnt").textContent = cnt;
+  document.getElementById("cost").textContent = cost;
+  document.getElementById("gain").textContent = gain;
+  var netEl = document.getElementById("net");
+  netEl.textContent = (net >= 0 ? "+" : "") + net;
+  netEl.style.color = net >= 0 ? "var(--green)" : "var(--red)";
+}
+function resetSim() {
+  cnt = 0; cost = 0; gain = 0;
+  document.getElementById("simResult").innerHTML = '<div style="color:var(--sub); font-size:14px;">点击按钮开始模拟 →</div>';
+  document.getElementById("cnt").textContent = 0;
+  document.getElementById("cost").textContent = 0;
+  document.getElementById("gain").textContent = 0;
+  document.getElementById("net").textContent = "+0";
+  document.getElementById("net").style.color = "var(--green)";
+}
+</script>
+</body>
+</html>
