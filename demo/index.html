@@ -91,8 +91,8 @@
 
 <header>
   <div class="tag">程序员节参赛作品 · 演示页</div>
-  <h1>麦门<span class="gold">积分炼金术</span></h1>
-  <div class="subtitle">把麦当劳积分当资产管：不浪费每一分，不乱抽每一次。基于麦当劳官方 MCP 实时数据。</div>
+  <h1>麦门<span class="gold">炼金术</span></h1>
+  <div class="subtitle">点餐 · 积分 · 优惠券，全链路帮你算账。进门之前算一笔，出门之后算一笔。基于麦当劳官方 MCP 实时数据。</div>
   <div class="snapshot">数据快照：2026-10-09 真实接口返回 · 账户数据已脱敏 · 演示无需登录</div>
 </header>
 
@@ -114,8 +114,22 @@
   <div class="fine">口径说明：官方未公示各奖品概率，"保底"指公开奖池最低价值项与成本的差值推断，非收益承诺；券类奖品价值需触发消费后兑现。</div>
 </div>
 
-<!-- ② 模拟器 -->
-<h2><span class="no">②</span>抽奖模拟器（不花真积分）</h2>
+<!-- ② 午餐三买法 -->
+<h2><span class="no">②</span>一顿巨无霸午餐的三种买单</h2>
+<div class="desc">决策副驾驶不只是积分——进门店餐的每一步都在算账（2026-10-09 上海某门店实测菜单）：</div>
+<div class="card" style="padding:12px 16px;">
+  <table>
+    <tr><th>买单方式</th><th>你付出的</th><th>折算成本</th><th>结论</th></tr>
+    <tr><td>单点（堡 25.5 + 薯条 13.5 + 可乐 9.5）</td><td class="num">48.5 元</td><td class="num">48.5 元</td><td>最贵，不用动脑</td></tr>
+    <tr><td>官方三件套（划线价 49 元）</td><td class="num">36.5 元</td><td class="num">36.5 元</td><td style="color:var(--green); font-weight:700;">省 12 元，无脑选</td></tr>
+    <tr><td>800 积分换「21.9 元巨无霸可乐组合」券</td><td class="num">800 分 + 21.9 元</td><td class="num">≈ 43.8 元</td><td style="color:var(--red); font-weight:700;">账面不省，只是积分的"保本出口"</td></tr>
+  </table>
+  <div class="verdict" style="margin-top:14px;">结论：现金吃 → 选套餐；积分要花 → 换 50 分档小额券（价值率 0.138 元/分，是巨无霸组合的 5 倍）。别让"积分不花就亏了"的感觉推着你乱换。</div>
+  <div class="fine" style="padding-top:10px;">折算口径：积分标尺 0.0274 元/分（= 21.9 元 ÷ 800 分），800 分 ≈ 21.9 元等值。标尺随商城实时数据更新。</div>
+</div>
+
+<!-- ③ 模拟器 -->
+<h2><span class="no">③</span>抽奖模拟器（不花真积分）</h2>
 <div class="desc">均匀随机模拟公开奖池，累计账本帮你直观感受"保底"的含义。非官方概率，仅供演示。</div>
 <div class="card">
   <button class="sim-btn" id="drawBtn" onclick="draw()">模拟抽一次</button>
@@ -130,8 +144,8 @@
   <div class="sim-note">等值口径：积分奖按面值；优惠券按"积分标尺 0.0274 元/分"折算券面省钱额（如立减 3 元券 ≈ 109 积分等值）。券需消费兑现，价值实现以你真实下单为准。</div>
 </div>
 
-<!-- ③ 奖池明细 -->
-<h2><span class="no">③</span>公开奖池明细</h2>
+<!-- ④ 奖池明细 -->
+<h2><span class="no">④</span>公开奖池明细</h2>
 <div class="desc">2026-10-09 实测返回的完整奖池（10 项）：</div>
 <div class="card" style="padding:12px 16px;">
   <table>
@@ -150,8 +164,8 @@
   <div class="fine" style="padding:10px 10px 2px;">折算假设：5 折券按约 34 元三件套省 17 元计；6 折按省 10.2 元计；积分标尺取 21.9 元巨无霸组合 / 800 积分 = 0.0274 元/分。以上为保守估算，仅用于横向比较。</div>
 </div>
 
-<!-- ④ 性价比榜 -->
-<h2><span class="no">④</span>积分商城性价比榜</h2>
+<!-- ⑤ 性价比榜 -->
+<h2><span class="no">⑤</span>积分商城性价比榜</h2>
 <div class="desc">统一"元/分"标尺后，商城商品第一次有了可比性（样本节选，价值率越高越值）：</div>
 <div class="card" style="padding:12px 16px;">
   <table>
@@ -165,8 +179,8 @@
   <div class="fine" style="padding:10px 10px 2px;">规律：积分消耗门槛越低，价值率越高——小额定向券是"积分最优出口"。</div>
 </div>
 
-<!-- ⑤ 过期预警 -->
-<h2><span class="no">⑤</span>过期积分预警</h2>
+<!-- ⑥ 过期预警 -->
+<h2><span class="no">⑥</span>过期积分预警</h2>
 <div class="desc">积分是会过期的资产。示例账户（脱敏）的健康度报告：</div>
 <div class="card">
   <div class="hp">
@@ -178,8 +192,8 @@
   <div class="verdict" style="background:#FDF1EC; border-color:#F3D2C4; color:#A33A20; margin-top:16px;">抢救方案（≤143 分全额消耗）：50 分派券 ×2 + 50 分可乐麦炫酷 ×1 + 剩余 43 分留着下月 —— 价值率 0.138 元/分，是巨无霸组合的 5 倍。</div>
 </div>
 
-<!-- ⑥ 活动日历 -->
-<h2><span class="no">⑥</span>十月活动日历（节选）</h2>
+<!-- ⑦ 活动日历 -->
+<h2><span class="no">⑦</span>十月活动日历（节选）</h2>
 <div class="desc">每天一张"麦麦情报简报"的数据源：</div>
 <div class="card">
   <div class="tl">
@@ -191,7 +205,7 @@
 </div>
 
 <footer>
-  本页面为「麦门积分炼金术」参赛演示，由个人独立开发，非麦当劳官方产品；数据为 2026-10-09 接口快照，具有时效性，请以麦当劳官方渠道实时结果为准。抽奖概率未公示，所有折算与期望分析均为演示口径。<br>
+  本页面为「麦门炼金术」参赛演示，由个人独立开发，非麦当劳官方产品；数据为 2026-10-09 接口快照，具有时效性，请以麦当劳官方渠道实时结果为准。抽奖概率未公示，所有折算与期望分析均为演示口径。<br>
   Made with WorkBuddy × 麦当劳 MCP · <a href="https://github.com/">GitHub 仓库地址（发布后更新）</a>
 </footer>
 
