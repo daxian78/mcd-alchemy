@@ -115,6 +115,14 @@
   </div>
   <div id="idxResult" class="sim-result"><div style="color:var(--sub); font-size:14px;">输入月薪 → 看看你在"巨无霸本位"下的真实购买力</div></div>
   <div id="idxTable"></div>
+  <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-top:14px;">
+    <button class="sim-btn" style="background:#26221F;" onclick="genPoster()">🎨 生成晒图海报</button>
+    <label style="font-size:13px; color:var(--sub); display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="showSalary"> 海报上显示月薪</label>
+  </div>
+  <div id="posterOut" style="margin-top:14px; display:none;">
+    <img id="posterImg" alt="巨无霸指数晒图海报" style="max-width:320px; width:100%; border-radius:12px; border:1px solid var(--line); display:block;" />
+    <a id="posterDl" download="bigmac-index.png" href="#" style="display:inline-block; margin-top:8px; font-size:13px; color:var(--red);">↓ 保存海报（手机长按图片也可保存）</a>
+  </div>
   <div class="fine" style="margin-top:10px;">价格锚点：巨无霸 25.5 元（2026-10-09 上海门店 MCP 实测）。时薪按 22 天/月 × 8 小时/天折算。娱乐向指标，概念源自《经济学人》，不代表官方，也不构成消费建议。</div>
 </div>
 
@@ -291,12 +299,17 @@ function resetSim() {
   document.getElementById("net").style.color = "var(--green)";
 }
 var BIGMAC_PRICE = 25.5;
+var lastIdx = null;
+var bgImg = new Image();
+bgImg.src = "assets/banner.png";
+function pf(w, size) { return w + " " + size + "px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif"; }
 var ITEMS = [["iPhone 17 Pro", 8999], ["星巴克大杯拿铁", 33], ["电影票", 45], ["地铁通勤月卡", 200], ["一场演唱会", 680], ["一次火锅局", 320]];
 function calcIndex() {
   var s = parseFloat(document.getElementById("salary").value);
   var out = document.getElementById("idxResult"), tbl = document.getElementById("idxTable");
   if (!s || s <= 0) { out.innerHTML = '<div style="color:var(--red); font-size:14px;">先填一个真实的月薪啦</div>'; tbl.innerHTML = ""; return; }
   var hourly = s / 22 / 8, per = hourly / BIGMAC_PRICE;
+  lastIdx = { s: s, hourly: hourly, per: per };
   var mood = per >= 3 ? "巨无霸自由区，恭喜" : per >= 1 ? "巨无霸小康，稳住" : "巨无霸挑战区，摸摸头";
   out.innerHTML =
     '<div class="hero-big" style="font-size:38px;">' + per.toFixed(1) + ' <small>个 / 小时 · ' + mood + '</small></div>' +
@@ -314,6 +327,53 @@ function calcCustom() {
   var p = parseFloat(document.getElementById("itemPrice").value);
   var n = document.getElementById("itemName").value || "它";
   document.getElementById("customOut").textContent = p > 0 ? (n + " = " + Math.ceil(p / BIGMAC_PRICE).toLocaleString() + " 个巨无霸") : "";
+}
+function genPoster() {
+  if (!lastIdx) { alert("先点「算一下」再生成海报"); return; }
+  var W = 750, H = 1000;
+  var c = document.createElement("canvas"); c.width = W; c.height = H;
+  var x = c.getContext("2d");
+  var RED = "#DA291C", YEL = "#FFC72C", INK = "#26221F", SUB = "#6B655F", BG = "#FBF8F4";
+  x.fillStyle = BG; x.fillRect(0, 0, W, H);
+  try {
+    if (bgImg.complete && bgImg.naturalWidth) {
+      var r = W / bgImg.naturalWidth, ih = bgImg.naturalHeight * r;
+      x.drawImage(bgImg, 0, 0, bgImg.naturalWidth, bgImg.naturalHeight, 0, 0, W, ih);
+      x.fillStyle = BG; x.fillRect(0, ih - 2, W, H - ih + 2);
+    }
+  } catch (e) {}
+  var y = 330;
+  x.fillStyle = YEL; x.fillRect(60, y - 34, 130, 14);
+  x.fillStyle = RED; x.font = pf(800, 60); x.fillText("巨无霸指数", 60, y + 40);
+  x.fillStyle = SUB; x.font = pf(400, 25); x.fillText("我的时薪，在巨无霸本位下——", 60, y + 92);
+  var per = lastIdx.per;
+  x.fillStyle = INK; x.font = pf(800, 132);
+  var numTxt = per.toFixed(1);
+  x.fillText(numTxt, 60, y + 230);
+  var nw = x.measureText(numTxt).width;
+  x.fillStyle = SUB; x.font = pf(600, 34);
+  x.fillText("个 / 小时", 66 + nw + 14, y + 230);
+  x.fillStyle = SUB; x.font = pf(400, 25);
+  x.fillText("时薪 " + lastIdx.hourly.toFixed(1) + " 元 ≈ 每小时 " + per.toFixed(1) + " 个巨无霸（25.5 元/个）", 60, y + 278);
+  if (document.getElementById("showSalary").checked) {
+    x.fillText("月薪 " + lastIdx.s.toLocaleString() + " 元", 60, y + 316);
+  }
+  x.fillStyle = INK; x.font = pf(600, 29); x.fillText("万物皆可巨无霸", 60, 770);
+  x.font = pf(400, 25);
+  ITEMS.slice(0, 3).forEach(function (it, i) {
+    var yy = 812 + i * 42;
+    x.fillStyle = SUB; x.fillText(it[0] + "（" + it[1].toLocaleString() + " 元）", 60, yy);
+    x.fillStyle = RED; x.font = pf(600, 25);
+    x.fillText("= " + Math.ceil(it[1] / BIGMAC_PRICE).toLocaleString() + " 个", 460, yy);
+    x.font = pf(400, 25);
+  });
+  x.fillStyle = "#B8AFA4"; x.font = pf(400, 19);
+  x.fillText("麦门炼金术 mcd-alchemy · 价格锚点 2026-10-09 · 娱乐向指标，非官方", 60, 952);
+  var url = c.toDataURL("image/png");
+  document.getElementById("posterImg").src = url;
+  document.getElementById("posterDl").href = url;
+  document.getElementById("posterOut").style.display = "block";
+  document.getElementById("posterOut").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 </script>
 </body>
