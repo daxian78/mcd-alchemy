@@ -117,13 +117,13 @@
   <div id="idxTable"></div>
   <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-top:14px;">
     <button class="sim-btn" style="background:#26221F;" onclick="genPoster()">🎨 生成晒图海报</button>
-    <label style="font-size:13px; color:var(--sub); display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="showSalary"> 海报上显示月薪</label>
+    <label style="font-size:13px; color:var(--sub); display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="showExact"> 海报显示精确指数（可倒推薪资，慎选）</label>
   </div>
   <div id="posterOut" style="margin-top:14px; display:none;">
     <img id="posterImg" alt="巨无霸指数晒图海报" style="max-width:320px; width:100%; border-radius:12px; border:1px solid var(--line); display:block;" />
     <a id="posterDl" download="bigmac-index.png" href="#" style="display:inline-block; margin-top:8px; font-size:13px; color:var(--red);">↓ 保存海报（手机长按图片也可保存）</a>
   </div>
-  <div class="fine" style="margin-top:10px;">价格锚点：巨无霸 25.5 元（2026-10-09 上海门店 MCP 实测）。时薪按 22 天/月 × 8 小时/天折算。娱乐向指标，概念源自《经济学人》，不代表官方，也不构成消费建议。</div>
+  <div class="fine" style="margin-top:10px;">价格锚点：巨无霸 25.5 元（2026-10-09 上海门店 MCP 实测）。时薪按 22 天/月 × 8 小时/天折算。<b>海报默认只显示档位不显示精确值——精确指数可倒推薪资</b>。娱乐向指标，概念源自《经济学人》，不代表官方，也不构成消费建议。</div>
 </div>
 
 <!-- ② 点餐代理 -->
@@ -304,6 +304,13 @@ var BG_DATA = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU
 var bgImg = new Image();
 bgImg.src = BG_DATA;
 function pf(w, size) { return w + " " + size + "px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif"; }
+function getTier(per) {
+  if (per >= 5) return { name: "巨无霸凡尔赛", lo: "5", hi: "", salary: "22k 以上", note: "巨无霸当零食的境界" };
+  if (per >= 3) return { name: "巨无霸自由", lo: "3", hi: "5", salary: "13k–22k", note: "聚餐你买单的那种自由" };
+  if (per >= 2) return { name: "巨无霸小康", lo: "2", hi: "3", salary: "9k–13k", note: "稳稳的幸福" };
+  if (per >= 1) return { name: "巨无霸温饱", lo: "1", hi: "2", salary: "4.5k–9k", note: "饿不着，也别浪" };
+  return { name: "巨无霸挑战区", lo: "0", hi: "1", salary: "4.5k 以下", note: "自由是种修行，摸摸头" };
+}
 var ITEMS = [["iPhone 17 Pro", 8999], ["星巴克大杯拿铁", 33], ["电影票", 45], ["地铁通勤月卡", 200], ["一场演唱会", 680], ["一次火锅局", 320]];
 function calcIndex() {
   var s = parseFloat(document.getElementById("salary").value);
@@ -311,10 +318,10 @@ function calcIndex() {
   if (!s || s <= 0) { out.innerHTML = '<div style="color:var(--red); font-size:14px;">先填一个真实的月薪啦</div>'; tbl.innerHTML = ""; return; }
   var hourly = s / 22 / 8, per = hourly / BIGMAC_PRICE;
   lastIdx = { s: s, hourly: hourly, per: per };
-  var mood = per >= 3 ? "巨无霸自由区，恭喜" : per >= 1 ? "巨无霸小康，稳住" : "巨无霸挑战区，摸摸头";
+  var t = getTier(per);
   out.innerHTML =
-    '<div class="hero-big" style="font-size:38px;">' + per.toFixed(1) + ' <small>个 / 小时 · ' + mood + '</small></div>' +
-    '<div style="font-size:13px; color:var(--sub); margin-top:4px;">时薪 ' + hourly.toFixed(1) + ' 元 ≈ 每工作 1 小时可兑换 ' + per.toFixed(1) + ' 个巨无霸（25.5 元/个）</div>';
+    '<div class="hero-big" style="font-size:38px;">' + per.toFixed(1) + ' <small>个 / 小时 · ' + t.name + '</small></div>' +
+    '<div style="font-size:13px; color:var(--sub); margin-top:4px;">时薪 ' + hourly.toFixed(1) + ' 元 ≈ 每工作 1 小时可兑换 ' + per.toFixed(1) + ' 个巨无霸（25.5 元/个）· ' + t.note + '</div>';
   var rows = ITEMS.map(function (it) {
     return '<tr><td>' + it[0] + '</td><td class="num">' + it[1].toLocaleString() + ' 元</td><td class="num"><b>' + Math.ceil(it[1] / BIGMAC_PRICE).toLocaleString() + '</b> 个</td></tr>';
   }).join("");
@@ -349,16 +356,24 @@ function buildPoster() {
   x.fillStyle = RED; x.font = pf(800, 60); x.fillText("巨无霸指数", 60, y + 40);
   x.fillStyle = SUB; x.font = pf(400, 25); x.fillText("我的时薪，在巨无霸本位下——", 60, y + 92);
   var per = lastIdx.per;
-  x.fillStyle = INK; x.font = pf(800, 132);
-  var numTxt = per.toFixed(1);
-  x.fillText(numTxt, 60, y + 230);
-  var nw = x.measureText(numTxt).width;
-  x.fillStyle = SUB; x.font = pf(600, 34);
-  x.fillText("个 / 小时", 66 + nw + 14, y + 230);
-  x.fillStyle = SUB; x.font = pf(400, 25);
-  x.fillText("时薪 " + lastIdx.hourly.toFixed(1) + " 元 ≈ 每小时 " + per.toFixed(1) + " 个巨无霸（25.5 元/个）", 60, y + 278);
-  if (document.getElementById("showSalary").checked) {
-    x.fillText("月薪 " + lastIdx.s.toLocaleString() + " 元", 60, y + 316);
+  var t = getTier(per);
+  if (document.getElementById("showExact").checked) {
+    x.fillStyle = INK; x.font = pf(800, 132);
+    var numTxt = per.toFixed(1);
+    x.fillText(numTxt, 60, y + 230);
+    var nw = x.measureText(numTxt).width;
+    x.fillStyle = SUB; x.font = pf(600, 34);
+    x.fillText("个 / 小时", 66 + nw + 14, y + 230);
+    x.fillStyle = SUB; x.font = pf(400, 25);
+    x.fillText("时薪 " + lastIdx.hourly.toFixed(1) + " 元 ≈ 每小时 " + per.toFixed(1) + " 个巨无霸（25.5 元/个）", 60, y + 278);
+  } else {
+    x.fillStyle = RED; x.font = pf(600, 24);
+    x.fillText("● 薪资保密 · 指数说话", 60, y + 176);
+    x.fillStyle = INK; x.font = pf(800, 86);
+    x.fillText(t.name, 60, y + 258);
+    x.fillStyle = SUB; x.font = pf(400, 26);
+    x.fillText("时薪 " + t.lo + (t.hi ? "–" + t.hi : "+") + " 个巨无霸（月薪约 " + t.salary + "）", 60, y + 306);
+    x.fillText(t.note, 60, y + 348);
   }
   x.fillStyle = INK; x.font = pf(600, 29); x.fillText("万物皆可巨无霸", 60, 770);
   x.font = pf(400, 25);
