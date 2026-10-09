@@ -82,6 +82,14 @@
   .tl-title { font-size: 14.5px; font-weight: 600; }
   .tl-sub { font-size: 13px; color: var(--sub); }
 
+  /* chat replay */
+  .chat { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+  .msg { max-width:88%; padding:10px 14px; border-radius:14px; font-size:13.5px; line-height:1.55; }
+  .msg.user { align-self:flex-end; background:var(--red); color:#fff; border-bottom-right-radius:4px; font-weight:600; }
+  .msg.bot { align-self:flex-start; background:#F6F1EA; border:1px solid var(--line); border-bottom-left-radius:4px; }
+  .msg .tool { display:inline-block; font-size:11px; background:#26221F; color:var(--yellow); border-radius:4px; padding:1px 7px; margin-right:6px; font-family:ui-monospace, Menlo, monospace; }
+  .plan { background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:8px; font-size:13px; }
+
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--sub); }
   a { color: var(--red); text-decoration: none; }
 </style>
@@ -92,12 +100,12 @@
 <header>
   <div class="tag">程序员节参赛作品 · 演示页</div>
   <h1>麦门<span class="gold">炼金术</span></h1>
-  <div class="subtitle">点餐 · 积分 · 优惠券，全链路帮你算账。进门之前算一笔，出门之后算一笔。基于麦当劳官方 MCP 实时数据。</div>
+  <div class="subtitle">三大模式：🌃夜航员深夜点餐 · 📊巨无霸指数 · 💰积分管家。基于麦当劳官方 MCP 实时数据。</div>
   <div class="snapshot">数据快照：2026-10-09 真实接口返回 · 账户数据已脱敏 · 演示无需登录</div>
 </header>
 
-<!-- ① 保底发现 -->
-<h2><span class="no">①</span>抽奖保底分析</h2>
+<!-- ④ 保底发现 -->
+<h2><span class="no">④</span>抽奖保底分析</h2>
 <div class="desc">抽奖前先算账。这是积分抽奖的真实成本与奖池下限：</div>
 <div class="card hero">
   <div style="font-size:14px; color:var(--sub);">单次抽奖成本 <b style="color:var(--ink)">24 积分</b>，公开奖池中价值最低的奖品：</div>
@@ -114,8 +122,41 @@
   <div class="fine">口径说明：官方未公示各奖品概率，"保底"指公开奖池最低价值项与成本的差值推断，非收益承诺；券类奖品价值需触发消费后兑现。</div>
 </div>
 
-<!-- ② 午餐三买法 -->
-<h2><span class="no">②</span>一顿巨无霸午餐的三种买单</h2>
+<!-- ① 巨无霸指数 -->
+<h2><span class="no">①</span>巨无霸指数</h2>
+<div class="desc">《经济学人》搞了 40 年的购买力指标 × 麦当劳 MCP 实时价格。输入月薪，看看你的时薪等于几个巨无霸：</div>
+<div class="card">
+  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+    <span style="font-size:13.5px; color:var(--sub); flex-shrink:0;">月薪（税前）</span>
+    <input id="salary" type="number" placeholder="例如 25000" style="flex:1; min-width:160px; padding:10px 14px; border:1.5px solid var(--line); border-radius:10px; font-size:15px;" />
+    <button class="sim-btn" onclick="calcIndex()">算一下</button>
+  </div>
+  <div id="idxResult" class="sim-result"><div style="color:var(--sub); font-size:14px;">输入月薪 → 看看你在"巨无霸本位"下的真实购买力</div></div>
+  <div id="idxTable"></div>
+  <div class="fine" style="margin-top:10px;">价格锚点：巨无霸 25.5 元（2026-10-09 上海门店 MCP 实测）。时薪按 22 天/月 × 8 小时/天折算。娱乐向指标，概念源自《经济学人》，不代表官方，也不构成消费建议。</div>
+</div>
+
+<!-- ② 夜航员 -->
+<h2><span class="no">②</span>夜航员 · 深夜全自主点餐（对话重放）</h2>
+<div class="desc">真实流程重放：23 点的加班夜，一句话，AI 跑完全链路（徽章 = 实际调用的 MCP 工具）：</div>
+<div class="card">
+  <div class="chat">
+    <div class="msg user">加班到 23 点，饿炸了。30 块以内安排一下。</div>
+    <div class="msg bot"><span class="tool">now-time-info</span>现在是 23:05，<b>宵夜时段</b>（22:14 - 23:59）。收到，预算 30 元。</div>
+    <div class="msg bot"><span class="tool">query-nearby-stores</span>找到 5 家可订门店，最近：<b>黄浦华旭国际大厦店（144m）</b>，营业中，支持宵夜预约 ✓</div>
+    <div class="msg bot"><span class="tool">query-meals</span>菜单已拉取。深夜档最优解：<b>随心配 1+1（13.9 元）</b>，堡 + 小食/饮料自由组合。</div>
+    <div class="msg bot"><span class="tool">calculate-price</span>组合完成，方案如下：
+      <div class="plan">✅ <b>推荐：精选超值随心配 1+1 —— 13.9 元</b><br>堡类 + 饮料/小食各一件，还剩 16.1 元预算<br>🥈 加个圆筒冰淇淋（5 元）凑 18.9 元，甜品收尾<br>🥈 板烧鸡腿堡 + 圆筒冰淇淋 = 28.5 元（正经吃饭版）</div>
+    </div>
+    <div class="msg bot"><span class="tool">create-order</span>订单已创建，支付链接甩给你 → 支付完成后我盯着订单，取餐码出来叫你。</div>
+    <div class="msg user">好家伙，全程我没动脑。</div>
+    <div class="msg bot">夜航员的本职。晚安，别加班太晚。</div>
+  </div>
+  <div class="fine" style="margin-top:12px;">以上为 2026-10-09 实测数据的流程重放。真实使用请装载 Skill，在 WorkBuddy 等 MCP 客户端里直接对话。</div>
+</div>
+
+<!-- ③ 午餐三买法 -->
+<h2><span class="no">③</span>一顿巨无霸午餐的三种买单</h2>
 <div class="desc">决策副驾驶不只是积分——进门店餐的每一步都在算账（2026-10-09 上海某门店实测菜单）：</div>
 <div class="card" style="padding:12px 16px;">
   <table>
@@ -128,8 +169,8 @@
   <div class="fine" style="padding-top:10px;">折算口径：积分标尺 0.0274 元/分（= 21.9 元 ÷ 800 分），800 分 ≈ 21.9 元等值。标尺随商城实时数据更新。</div>
 </div>
 
-<!-- ③ 模拟器 -->
-<h2><span class="no">③</span>抽奖模拟器（不花真积分）</h2>
+<!-- ⑤ 模拟器 -->
+<h2><span class="no">⑤</span>抽奖模拟器（不花真积分）</h2>
 <div class="desc">均匀随机模拟公开奖池，累计账本帮你直观感受"保底"的含义。非官方概率，仅供演示。</div>
 <div class="card">
   <button class="sim-btn" id="drawBtn" onclick="draw()">模拟抽一次</button>
@@ -144,8 +185,8 @@
   <div class="sim-note">等值口径：积分奖按面值；优惠券按"积分标尺 0.0274 元/分"折算券面省钱额（如立减 3 元券 ≈ 109 积分等值）。券需消费兑现，价值实现以你真实下单为准。</div>
 </div>
 
-<!-- ④ 奖池明细 -->
-<h2><span class="no">④</span>公开奖池明细</h2>
+<!-- ⑥ 奖池明细 -->
+<h2><span class="no">⑥</span>公开奖池明细</h2>
 <div class="desc">2026-10-09 实测返回的完整奖池（10 项）：</div>
 <div class="card" style="padding:12px 16px;">
   <table>
@@ -164,8 +205,8 @@
   <div class="fine" style="padding:10px 10px 2px;">折算假设：5 折券按约 34 元三件套省 17 元计；6 折按省 10.2 元计；积分标尺取 21.9 元巨无霸组合 / 800 积分 = 0.0274 元/分。以上为保守估算，仅用于横向比较。</div>
 </div>
 
-<!-- ⑤ 性价比榜 -->
-<h2><span class="no">⑤</span>积分商城性价比榜</h2>
+<!-- ⑦ 性价比榜 -->
+<h2><span class="no">⑦</span>积分商城性价比榜</h2>
 <div class="desc">统一"元/分"标尺后，商城商品第一次有了可比性（样本节选，价值率越高越值）：</div>
 <div class="card" style="padding:12px 16px;">
   <table>
@@ -179,8 +220,8 @@
   <div class="fine" style="padding:10px 10px 2px;">规律：积分消耗门槛越低，价值率越高——小额定向券是"积分最优出口"。</div>
 </div>
 
-<!-- ⑥ 过期预警 -->
-<h2><span class="no">⑥</span>过期积分预警</h2>
+<!-- ⑧ 过期预警 -->
+<h2><span class="no">⑧</span>过期积分预警</h2>
 <div class="desc">积分是会过期的资产。示例账户（脱敏）的健康度报告：</div>
 <div class="card">
   <div class="hp">
@@ -192,8 +233,8 @@
   <div class="verdict" style="background:#FDF1EC; border-color:#F3D2C4; color:#A33A20; margin-top:16px;">抢救方案（≤143 分全额消耗）：50 分派券 ×2 + 50 分可乐麦炫酷 ×1 + 剩余 43 分留着下月 —— 价值率 0.138 元/分，是巨无霸组合的 5 倍。</div>
 </div>
 
-<!-- ⑦ 活动日历 -->
-<h2><span class="no">⑦</span>十月活动日历（节选）</h2>
+<!-- ⑨ 活动日历 -->
+<h2><span class="no">⑨</span>十月活动日历（节选）</h2>
 <div class="desc">每天一张"麦麦情报简报"的数据源：</div>
 <div class="card">
   <div class="tl">
@@ -248,6 +289,31 @@ function resetSim() {
   document.getElementById("gain").textContent = 0;
   document.getElementById("net").textContent = "+0";
   document.getElementById("net").style.color = "var(--green)";
+}
+var BIGMAC_PRICE = 25.5;
+var ITEMS = [["iPhone 17 Pro", 8999], ["星巴克大杯拿铁", 33], ["电影票", 45], ["地铁通勤月卡", 200], ["一场演唱会", 680], ["一次火锅局", 320]];
+function calcIndex() {
+  var s = parseFloat(document.getElementById("salary").value);
+  var out = document.getElementById("idxResult"), tbl = document.getElementById("idxTable");
+  if (!s || s <= 0) { out.innerHTML = '<div style="color:var(--red); font-size:14px;">先填一个真实的月薪啦</div>'; tbl.innerHTML = ""; return; }
+  var hourly = s / 22 / 8, per = hourly / BIGMAC_PRICE;
+  var mood = per >= 3 ? "巨无霸自由区，恭喜" : per >= 1 ? "巨无霸小康，稳住" : "巨无霸挑战区，摸摸头";
+  out.innerHTML =
+    '<div class="hero-big" style="font-size:38px;">' + per.toFixed(1) + ' <small>个 / 小时 · ' + mood + '</small></div>' +
+    '<div style="font-size:13px; color:var(--sub); margin-top:4px;">时薪 ' + hourly.toFixed(1) + ' 元 ≈ 每工作 1 小时可兑换 ' + per.toFixed(1) + ' 个巨无霸（25.5 元/个）</div>';
+  var rows = ITEMS.map(function (it) {
+    return '<tr><td>' + it[0] + '</td><td class="num">' + it[1].toLocaleString() + ' 元</td><td class="num"><b>' + Math.ceil(it[1] / BIGMAC_PRICE).toLocaleString() + '</b> 个</td></tr>';
+  }).join("");
+  tbl.innerHTML =
+    '<table style="margin-top:14px;"><tr><th>万物皆可巨无霸</th><th>价格</th><th>等于</th></tr>' + rows +
+    '<tr><td><input id="itemName" placeholder="自定义物品" style="width:120px; padding:4px 8px; border:1px solid var(--line); border-radius:6px; font-size:13px;"></td>' +
+    '<td><input id="itemPrice" type="number" placeholder="价格" style="width:90px; padding:4px 8px; border:1px solid var(--line); border-radius:6px; font-size:13px;"></td>' +
+    '<td><button class="sim-btn" style="padding:4px 12px; font-size:12.5px;" onclick="calcCustom()">换算</button> <b id="customOut" style="font-size:13px;"></b></td></tr></table>';
+}
+function calcCustom() {
+  var p = parseFloat(document.getElementById("itemPrice").value);
+  var n = document.getElementById("itemName").value || "它";
+  document.getElementById("customOut").textContent = p > 0 ? (n + " = " + Math.ceil(p / BIGMAC_PRICE).toLocaleString() + " 个巨无霸") : "";
 }
 </script>
 </body>

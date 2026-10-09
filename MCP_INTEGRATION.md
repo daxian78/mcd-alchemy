@@ -22,6 +22,9 @@
 | `query-nearby-stores` | 附近门店查询 | 点餐算账的入口（到店自提/得来速），获取 storeCode/beCode |
 | `query-meals` | 门店实时菜单 | 单品/套餐/随心配现价与划线价（模块一核心数据） |
 | `calculate-price` | 商品价格计算 | 买单路径复核（含优惠券组合后的应付价） |
+| `query-store-coupons` | 门店可用券列表 | 夜航员下单前的优惠检查 |
+| `create-order` | 创建订单 | 夜航员终步：建单返回支付链接（支付由用户完成，仅确认后调用） |
+| `query-order` / `cancel-order` | 订单查询/取消 | 下单后跟踪进度、用户反悔时取消 |
 | `query-my-account` | 积分账户详情 | 读取可用积分、本月/下月将过期积分（模块二输入） |
 | `mall-points-products` | 积分商城商品列表 | 性价比榜与过期消耗推荐的商品池（模块二/四） |
 | `query-lottery-info` | 积分抽奖活动信息 | 奖池、单次成本、服务端资源决策（模块三输入） |
@@ -34,29 +37,32 @@
 ## 核心调用流程
 
 ```
-模块一（点餐算账）
-query-nearby-stores ──→ query-meals(storeCode)
-   ├─ 单点合计（单品现价相加）
-   ├─ 官方套餐现价 vs 划线价（立省额）
-   ├─ 随心配 1+1 固定价
-   ├─ 积分券路径：所需积分 × 标尺折算 + 券后现金
-   └─ calculate-price 复核 → 输出买单对比表
+模块〇（模式路由）
+用户意图 → 夜航员(点餐/饿了/宵夜) | 巨无霸指数(工资/购买力) | 会员管家(积分/抽奖/活动)
 
-模块二（过期预警）
+模块一（夜航员·深夜全自主点餐）
+now-time-info(时段) → query-nearby-stores(宵夜/24h门店) → query-meals(预算档位组合)
+   → 随心配1+1优先 + query-store-coupons 优惠检查 → calculate-price 复核
+   → 方案对比表(≤3套) → 用户确认 → create-order(支付链接) → query-order 跟踪
+
+模块二（巨无霸指数）
+query-meals(巨无霸实时价) → 月薪÷22÷8=时薪 → 时薪÷单价=巨无霸时薪 → 万物换算
+
+模块三（过期预警）
 query-my-account ──┬─ currentMouthExpirePoint = 0 → 输出"账户健康"
                    └─ > 0 → mall-points-products
                               → 计算 积分价值率 = price / point
                               → 筛选 point ≤ 过期分值 → 输出消耗建议表
 
-模块三（抽奖分析）
+模块四（抽奖分析）
 query-lottery-info ──┬─ drawPoint + prizes[] + drawDecision
                      ├─ 保底分析：min(奖品折算价值) − drawPoint
                      └─ 用户确认消耗 → draw-lottery
 
-模块四（性价比榜）
+模块五（性价比榜）
 mall-points-products → 全量在售(status=2) → 价值率排序 → Top 10
 
-模块五（活动联动）
+模块六（活动联动）
 now-time-info → campaign-calendar(±2天) → available-coupons
              → 用户确认 → auto-bind-coupons → query-my-coupons
 ```
