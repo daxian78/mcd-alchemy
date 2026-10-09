@@ -365,7 +365,7 @@ function buildPoster() {
   rr(x, 48, 50, 216, 54, 27); x.fillStyle = YEL; x.fill();
   x.fillStyle = INK; x.font = pf(800, 26); x.textAlign = "center";
   x.fillText("麦门炼金术", 156, 86);
-  x.fillStyle = "rgba(255,255,255,0.92)"; x.font = pf(600, 24);
+  x.fillStyle = "rgba(255,255,255,0.92)"; x.font = pf(600, 24); x.textAlign = "right";
   x.fillText("巨无霸指数", W - 48, 80);
   x.font = pf(400, 15); x.fillText("BIG MAC INDEX", W - 48, 104);
   x.textAlign = "left";
@@ -401,7 +401,7 @@ function buildPoster() {
     rr(x, W / 2 - pw / 2, cy + 372, pw, 50, 25); x.fillStyle = YEL; x.fill();
     x.fillStyle = INK; x.fillText(pill, W / 2, cy + 405);
     x.font = pf(400, 23);
-    x.fillText(t.note + " · 月薪约 " + t.salary, W / 2, cy + 470);
+    x.fillText(t.note, W / 2, cy + 470);
   }
   x.fillStyle = SUB; x.font = pf(400, 20);
   x.fillText("长按保存，看看朋友都在哪一档", W / 2, cy + 512);
