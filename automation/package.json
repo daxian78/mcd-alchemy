@@ -1,0 +1,18 @@
+{
+  "name": "mcd-alchemy-automation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "麦门炼金术 · 每日麦麦情报自动化简报（GitHub Actions + 多平台 webhook 推送）",
+  "main": "daily-brief.mjs",
+  "scripts": {
+    "start": "node daily-brief.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

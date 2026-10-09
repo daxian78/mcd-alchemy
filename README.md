@@ -38,7 +38,15 @@
 | 📊 积分性价比榜 | 商城商品统一折算"元/分"标尺，跨类目排出真值榜 | `mall-points-products` |
 | 📅 活动领券联动 | 今日/明日活动 + 可领券一键收好 | `campaign-calendar` + `available-coupons` |
 
-**在线演示（无需 Token）**：打开 [`demo/index.html`](./demo/index.html)，全部基于 2026-10-09 真实接口数据，含可玩的抽奖模拟器。
+## 三种打开方式
+
+| 端 | 形态 | 适合谁 |
+|---|---|---|
+| 💬 **对话端** | 在 WorkBuddy / Cursor 等 MCP Client 装载 Skill，随问随算 | 想交互式分析的人 |
+| ⏰ **自动简报端** | GitHub Actions 每日 08:00 自动跑 Skill 逻辑，「今日麦麦情报」（活动+积分过期倒计时+抽奖保底速算+天气钩子）推送到**企微/钉钉/飞书/Telegram 群机器人** | 想每天被动接收、零操作的人 |
+| 🌐 **在线演示端** | GitHub Pages 交互 demo（含可玩的抽奖模拟器），无需 Token 无需登录 | 围观者（链接发布后更新） |
+
+自动化端是本项目的灵魂：**从"你问它才答"升级为"它每天主动找你"**。你的 Token 存在你自己仓库的 Secrets 里，不经过任何第三方服务器。配置指南见 [`automation/README.md`](./automation/README.md)，5 分钟配完。
 
 ## 快速开始（3 分钟）
 
@@ -101,10 +109,14 @@ mcd-alchemy/
 ├── MCP_INTEGRATION.md               # MCP 工具集成与调用流程
 ├── mcp-config.example.json          # 脱敏 MCP 配置（环境变量占位符）
 ├── skills/mcd-alchemy/SKILL.md      # Skill 主体（五大模块分析框架）
-├── demo/index.html                  # 交互演示页（内置真实数据快照 + 抽奖模拟器）
-└── docs/
-    ├── data-snapshots/              # 接口数据快照（可复现）
-    └── demo.gif                     # 演示动图
+├── demo/index.html                  # 交互演示页（GitHub Pages 托管）
+├── automation/                      # 每日简报自动化（Actions + 多平台 webhook）
+│   ├── daily-brief.mjs              # 主脚本：MCP 数据采集 + Open-Meteo 天气 + 四通道推送
+│   ├── README.md                    # 配置指南（Secrets / webhook 教程）
+│   └── .env.example                 # 本地调试环境变量模板
+└── .github/workflows/
+    ├── daily-brief.yml              # 定时任务：北京时间每日 08:00
+    └── pages.yml                    # demo 页自动部署 GitHub Pages
 ```
 
 ## 注意事项

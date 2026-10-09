@@ -69,6 +69,15 @@ now-time-info → campaign-calendar(±2天) → available-coupons
 4. **统一价值标尺**：现金、积分、券全部折算"元/分"，跨形态可比，杜绝"积分错觉消费"。
 5. **真实消耗类操作全部二次确认**：Skill 层强制护栏，符合个人资产工具的审慎原则。
 
+## 自动化层（GitHub Actions 每日简报）
+
+除对话式调用外，本项目包含一套自动化工作流（`automation/` + `.github/workflows/daily-brief.yml`）：
+
+- 每日北京时间 08:00 由 GitHub Actions 触发，通过 MCP 官方 SDK（Streamable HTTP）调用
+  `campaign-calendar` / `query-my-account` / `query-lottery-info` 三个工具生成「今日麦麦情报」
+- 天气增强使用 [Open-Meteo](https://open-meteo.com) 免费 API（**非麦当劳能力**，仅作推荐钩子，已明确标注）
+- 推送目标是用户自行配置的企微/钉钉/飞书/Telegram 群机器人 webhook，Token 全部存于用户仓库 Secrets
+
 ## 兼容性说明
 
 - 本 Skill 在 WorkBuddy（官方合作伙伴）中开发与验证，兼容任意支持 Streamable HTTP 的 MCP Client（Cursor / Cherry Studio / Trae / VSCode 等）。

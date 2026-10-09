@@ -1,0 +1,31 @@
+name: daily-brief
+on:
+  schedule:
+    - cron: "0 0 * * *" # UTC 00:00 = 北京时间每日 08:00
+  workflow_dispatch: {}
+
+jobs:
+  brief:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install deps
+        working-directory: automation
+        run: npm install --no-audit --no-fund
+      - name: Run daily brief
+        working-directory: automation
+        env:
+          MCD_MCP_TOKEN: ${{ secrets.MCD_MCP_TOKEN }}
+          WEATHER_LAT: ${{ vars.WEATHER_LAT }}
+          WEATHER_LON: ${{ vars.WEATHER_LON }}
+          WECOM_WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
+          DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
+          DINGTALK_SECRET: ${{ secrets.DINGTALK_SECRET }}
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        run: node daily-brief.mjs
