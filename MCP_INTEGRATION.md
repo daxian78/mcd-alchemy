@@ -22,8 +22,8 @@
 | `query-nearby-stores` | 附近门店查询 | 点餐算账的入口（到店自提/得来速），获取 storeCode/beCode |
 | `query-meals` | 门店实时菜单 | 单品/套餐/随心配现价与划线价（模块一核心数据） |
 | `calculate-price` | 商品价格计算 | 买单路径复核（含优惠券组合后的应付价） |
-| `query-store-coupons` | 门店可用券列表 | 夜航员下单前的优惠检查 |
-| `create-order` | 创建订单 | 夜航员终步：建单返回支付链接（支付由用户完成，仅确认后调用） |
+| `query-store-coupons` | 门店可用券列表 | 点餐代理下单前的优惠检查 |
+| `create-order` | 创建订单 | 点餐代理终步：建单返回支付链接（支付由用户完成，仅确认后调用） |
 | `query-order` / `cancel-order` | 订单查询/取消 | 下单后跟踪进度、用户反悔时取消 |
 | `query-my-account` | 积分账户详情 | 读取可用积分、本月/下月将过期积分（模块二输入） |
 | `mall-points-products` | 积分商城商品列表 | 性价比榜与过期消耗推荐的商品池（模块二/四） |
@@ -38,10 +38,10 @@
 
 ```
 模块〇（模式路由）
-用户意图 → 夜航员(点餐/饿了/宵夜) | 巨无霸指数(工资/购买力) | 会员管家(积分/抽奖/活动)
+用户意图 → 点餐代理(点餐/饿了/任何时段) | 巨无霸指数(工资/购买力) | 会员管家(积分/抽奖/活动)
 
-模块一（夜航员·深夜全自主点餐）
-now-time-info(时段) → query-nearby-stores(宵夜/24h门店) → query-meals(预算档位组合)
+模块一（点餐代理·全天候全自主点餐，深夜档绰号"夜航员"）
+now-time-info(时段) → query-nearby-stores(营业中/宵夜/24h门店) → query-meals(预算档位组合)
    → 随心配1+1优先 + query-store-coupons 优惠检查 → calculate-price 复核
    → 方案对比表(≤3套) → 用户确认 → create-order(支付链接) → query-order 跟踪
 
