@@ -336,56 +336,89 @@ function calcCustom() {
   var n = document.getElementById("itemName").value || "它";
   document.getElementById("customOut").textContent = p > 0 ? (n + " = " + Math.ceil(p / BIGMAC_PRICE).toLocaleString() + " 个巨无霸") : "";
 }
+function rr(x, px, py, pw, ph, r) {
+  x.beginPath();
+  x.moveTo(px + r, py);
+  x.arcTo(px + pw, py, px + pw, py + ph, r);
+  x.arcTo(px + pw, py + ph, px, py + ph, r);
+  x.arcTo(px, py + ph, px, py, r);
+  x.arcTo(px, py, px + pw, py, r);
+  x.closePath();
+}
 function buildPoster() {
   if (!lastIdx) { alert("先点「算一下」再生成海报"); return; }
   var W = 750, H = 1000;
   var c = document.createElement("canvas"); c.width = W; c.height = H;
   var x = c.getContext("2d");
   var RED = "#DA291C", YEL = "#FFC72C", INK = "#26221F", SUB = "#6B655F", BG = "#FBF8F4";
-  x.fillStyle = BG; x.fillRect(0, 0, W, H);
+  x.fillStyle = RED; x.fillRect(0, 0, W, H);
+  x.fillStyle = YEL;
+  [[340, 64, 14, 40], [364, 48, 14, 56], [388, 58, 14, 46]].forEach(function (b) {
+    rr(x, b[0], b[1], b[2], b[3], 7); x.fill();
+  });
+  x.fillStyle = "rgba(255,255,255,0.25)";
+  [[330, 58, 10], [404, 52, 8]].forEach(function (d) {
+    x.beginPath(); x.arc(d[0], d[1], d[2], 0, Math.PI * 2); x.fill();
+  });
+  x.fillStyle = YEL;
+  [640, 668, 696].forEach(function (dx) { x.beginPath(); x.arc(dx, 958, 7, 0, Math.PI * 2); x.fill(); });
+  rr(x, 48, 50, 216, 54, 27); x.fillStyle = YEL; x.fill();
+  x.fillStyle = INK; x.font = pf(800, 26); x.textAlign = "center";
+  x.fillText("麦门炼金术", 156, 86);
+  x.fillStyle = "rgba(255,255,255,0.92)"; x.font = pf(600, 24);
+  x.fillText("巨无霸指数", W - 48, 80);
+  x.font = pf(400, 15); x.fillText("BIG MAC INDEX", W - 48, 104);
+  x.textAlign = "left";
+  var cx = 40, cy = 148, cw = W - 80, ch = 552;
+  rr(x, cx, cy, cw, ch, 32); x.fillStyle = BG; x.fill();
+  x.save();
+  rr(x, cx + 24, cy + 24, cw - 48, 168, 20); x.clip();
   try {
     if (bgImg.complete && bgImg.naturalWidth) {
-      var stripH = 220, natW = bgImg.naturalWidth, natH = bgImg.naturalHeight;
-      var sh = Math.min(natH, stripH * natW / W);
-      var sy = Math.max(0, (natH - sh) / 2);
-      x.drawImage(bgImg, 0, sy, natW, sh, 0, 0, W, stripH);
+      var iw = cw - 48, ihh = 168, natW = bgImg.naturalWidth, natH = bgImg.naturalHeight;
+      var s = Math.max(iw / natW, ihh / natH), dw = natW * s, dh = natH * s;
+      x.drawImage(bgImg, (iw - dw) / 2 + cx + 24, (ihh - dh) / 2 + cy + 24, dw, dh);
     }
   } catch (e) {}
-  var y = 330;
-  x.fillStyle = YEL; x.fillRect(60, y - 34, 130, 14);
-  x.fillStyle = RED; x.font = pf(800, 60); x.fillText("巨无霸指数", 60, y + 40);
-  x.fillStyle = SUB; x.font = pf(400, 25); x.fillText("我的时薪，在巨无霸本位下——", 60, y + 92);
-  var per = lastIdx.per;
-  var t = getTier(per);
-  if (document.getElementById("showExact").checked) {
-    x.fillStyle = INK; x.font = pf(800, 132);
-    var numTxt = per.toFixed(1);
-    x.fillText(numTxt, 60, y + 230);
-    var nw = x.measureText(numTxt).width;
-    x.fillStyle = SUB; x.font = pf(600, 34);
-    x.fillText("个 / 小时", 66 + nw + 14, y + 230);
-    x.fillStyle = SUB; x.font = pf(400, 25);
-    x.fillText("时薪 " + lastIdx.hourly.toFixed(1) + " 元 ≈ 每小时 " + per.toFixed(1) + " 个巨无霸（25.5 元/个）", 60, y + 278);
+  x.restore();
+  var per = lastIdx.per, t = getTier(per), exact = document.getElementById("showExact").checked;
+  x.textAlign = "center";
+  x.fillStyle = SUB; x.font = pf(400, 23);
+  x.fillText("我的时薪，在巨无霸本位下", W / 2, cy + 234);
+  if (exact) {
+    x.fillStyle = INK; x.font = pf(800, 104);
+    x.fillText(per.toFixed(1), W / 2, cy + 348);
+    x.fillStyle = SUB; x.font = pf(600, 26);
+    x.fillText("个巨无霸 / 小时 · 时薪 " + lastIdx.hourly.toFixed(1) + " 元", W / 2, cy + 392);
+    x.font = pf(400, 23);
+    x.fillText("娱乐口径 · 25.5 元 / 个", W / 2, cy + 470);
   } else {
-    x.fillStyle = RED; x.font = pf(600, 24);
-    x.fillText("● 薪资保密 · 指数说话", 60, y + 176);
-    x.fillStyle = INK; x.font = pf(800, 86);
-    x.fillText(t.name, 60, y + 258);
-    x.fillStyle = SUB; x.font = pf(400, 26);
-    x.fillText("时薪 " + t.lo + (t.hi ? "–" + t.hi : "+") + " 个巨无霸（月薪约 " + t.salary + "）", 60, y + 306);
-    x.fillText(t.note, 60, y + 348);
+    x.fillStyle = RED; x.font = pf(800, 74);
+    x.fillText(t.name, W / 2, cy + 344);
+    var pill = "时薪 " + t.lo + (t.hi ? "–" + t.hi : "+") + " 个巨无霸";
+    x.font = pf(600, 26);
+    var pw = x.measureText(pill).width + 60;
+    rr(x, W / 2 - pw / 2, cy + 372, pw, 50, 25); x.fillStyle = YEL; x.fill();
+    x.fillStyle = INK; x.fillText(pill, W / 2, cy + 405);
+    x.font = pf(400, 23);
+    x.fillText(t.note + " · 月薪约 " + t.salary, W / 2, cy + 470);
   }
-  x.fillStyle = INK; x.font = pf(600, 29); x.fillText("万物皆可巨无霸", 60, 770);
-  x.font = pf(400, 25);
+  x.fillStyle = SUB; x.font = pf(400, 20);
+  x.fillText("长按保存，看看朋友都在哪一档", W / 2, cy + 512);
+  x.textAlign = "left";
+  x.fillStyle = YEL; x.font = pf(800, 28); x.fillText("万物皆可巨无霸", 48, 742);
   ITEMS.slice(0, 3).forEach(function (it, i) {
-    var yy = 812 + i * 42;
-    x.fillStyle = SUB; x.fillText(it[0] + "（" + it[1].toLocaleString() + " 元）", 60, yy);
-    x.fillStyle = RED; x.font = pf(600, 25);
-    x.fillText("= " + Math.ceil(it[1] / BIGMAC_PRICE).toLocaleString() + " 个", 460, yy);
-    x.font = pf(400, 25);
+    var yy = 792 + i * 54;
+    x.fillStyle = "#FFFFFF"; x.font = pf(400, 26);
+    x.fillText(it[0], 48, yy);
+    x.font = pf(400, 20); x.fillStyle = "rgba(255,255,255,0.7)";
+    x.fillText(it[1].toLocaleString() + " 元", 330, yy);
+    x.fillStyle = YEL; x.font = pf(800, 26); x.textAlign = "right";
+    x.fillText("= " + Math.ceil(it[1] / BIGMAC_PRICE).toLocaleString() + " 个", W - 48, yy);
+    x.textAlign = "left";
   });
-  x.fillStyle = "#B8AFA4"; x.font = pf(400, 19);
-  x.fillText("麦门炼金术 mcd-alchemy · 价格锚点 2026-10-09 · 娱乐向指标，非官方", 60, 952);
+  x.fillStyle = "rgba(255,255,255,0.75)"; x.font = pf(400, 17);
+  x.fillText("mcd-alchemy · 巨无霸价格锚点 2026-10-09 · 娱乐向指标，非官方", 48, 962);
   var url = c.toDataURL("image/png");
   document.getElementById("posterImg").src = url;
   document.getElementById("posterDl").href = url;
