@@ -82,6 +82,19 @@
   .tl-title { font-size: 14.5px; font-weight: 600; }
   .tl-sub { font-size: 13px; color: var(--sub); }
 
+  /* configurator */
+  .round { margin-top:14px; }
+  .round-h { font-size:13px; font-weight:700; color:var(--sub); margin-bottom:8px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:7px 12px; font-size:13px; cursor:pointer; user-select:none; }
+  .chip:hover { border-color:var(--red); }
+  .chip.on { border-color:var(--red); background:#FDEEEE; color:var(--red); font-weight:700; }
+  .chip .dp { font-size:11.5px; color:var(--sub); margin-left:4px; }
+  .chip.on .dp { color:var(--red); }
+  .cfg-total { margin-top:16px; border-top:1.5px dashed var(--line); padding-top:10px; }
+  .cfg-total-row { display:flex; justify-content:space-between; font-size:13.5px; color:var(--sub); padding:3px 0; }
+  .cfg-sum { margin-top:8px; font-size:12.5px; color:var(--sub); background:#FAF6EF; border-radius:8px; padding:8px 12px; }
+
   /* chat replay */
   .chat { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
   .msg { max-width:88%; padding:10px 14px; border-radius:14px; font-size:13.5px; line-height:1.55; }
@@ -144,6 +157,23 @@
   </div>
   <div class="fine" style="margin-top:12px;">以上为 2026-10-09 实测数据的流程重放。真实使用请装载 Skill，在 WorkBuddy 等 MCP 客户端里直接对话。</div>
 </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <div style="font-size:15px; font-weight:700;">🎮 套餐配置器 · 点选直接改</div>
+      <button class="sim-btn" onclick="cfgReset()" style="background:#B8AFA4; padding:6px 14px; font-size:12.5px;">恢复默认</button>
+    </div>
+    <div class="desc" style="margin-top:8px;">方案 B「龙焰鸡腿堡四件套」真实结构（2026-10-10 query-meal-detail 实测）。点选任意选项，价格实时重算：</div>
+    <div id="cfgRounds"></div>
+    <div class="cfg-total">
+      <div class="cfg-total-row"><span>商品价</span><b id="cfgFood" style="color:var(--ink);">¥36.9</b></div>
+      <div class="cfg-total-row"><span>配送费</span><span>¥6.0</span></div>
+      <div class="cfg-total-row"><span>打包费</span><span>¥1.9</span></div>
+      <div class="cfg-total-row" style="font-size:17px;"><b style="color:var(--ink);">合计</b><b id="cfgAll" style="color:var(--red);">¥44.8</b></div>
+    </div>
+    <div class="cfg-sum" id="cfgSum"></div>
+    <div class="fine" style="margin-top:10px;">真实接入时，这份点选结果会以 roundList + modification 结构传给 calculate-price 复价、create-order 下单；特制组（冰量等）按官方规则全量传 selectedKey / unselectedKey。</div>
+  </div>
 
 <!-- ③ 午餐三买法 -->
 <h2><span class="no">③</span>一顿巨无霸午餐的三种买单</h2>
@@ -430,6 +460,64 @@ function genPoster() {
   try { buildPoster(); }
   catch (e) { alert("海报生成失败：" + (e && e.message ? e.message : e) + "\n（已尝试降级，请重试一次；仍失败请到 GitHub 提 issue）"); }
 }
+
+/* ---------- 套餐配置器（方案 B 真实结构快照） ---------- */
+var R2 = [["501205","中薯条",0],["521986","马苏里拉芝士条",1.5],["521983","心形薯饼5块+韩式酱",1],["903420","脆脆薯条",2],["501206","大薯条",2],["904437","玉米杯(小)",-1]];
+var R3 = [["901401","麦乐鸡5块",0],["920359","韩式芝士脆汁鸡腿",4],["920360","韩式芝士鸡柳",3.5],["901700","麦辣鸡翅2块",1],["920123","薄皮焦香V翅",2],["521823","脆皮鸡柳3根",0.5],["900943","麦麦脆汁鸡琵琶腿",1]];
+var R4 = [["903050","可口可乐(中)",0],["903060","雪碧(中)",0],["903071","无糖可乐(中)",0],["903418","柠檬红茶(中)",0],["903495","怡泉+C(中)",1.5],["906352","黄金橙橙",3],["521327","鲜萃冰咖",2],["507368","热美式(中)",8],["507409","冰奶铁(中)",10],["903755","纯牛奶",0.5],["901027","苹果汁",2],["903505","锡兰红茶",1]];
+var ICE_DRINKS = ["903050","903060","903071","903418","903495","906352"];
+var cfg = { sauce: true, lettuce: true, r2: "501205", r3: "901401", r4: "903050", ice: "标准" };
+
+function cfgChip(label, diff, on, action) {
+  var dp = diff === 0 ? "" : (diff > 0 ? "+" : "") + diff + " 元";
+  return '<div class="chip' + (on ? " on" : "") + '" onclick="' + action + '">' + label +
+         (dp ? '<span class="dp">' + dp + '</span>' : "") + '</div>';
+}
+function cfgRender() {
+  var h = "";
+  h += '<div class="round"><div class="round-h">① 主堡 · 龙焰鸡腿堡【可特调】</div><div class="chips">';
+  h += cfgChip("辣椒黄油风味酱", 0, cfg.sauce, "cfgToggle('sauce')");
+  h += cfgChip("切块生菜", 0, cfg.lettuce, "cfgToggle('lettuce')");
+  h += '</div><div class="mod-h">两项为默认全料，点选即去除 · 最多保留 2 项</div></div>';
+  h += '<div class="round"><div class="round-h">② 选择小食一</div><div class="chips">';
+  R2.forEach(function (c) { h += cfgChip(c[1], c[2], cfg.r2 === c[0], "cfgPick('r2','" + c[0] + "')"); });
+  h += '</div></div>';
+  h += '<div class="round"><div class="round-h">③ 选择小食二</div><div class="chips">';
+  R3.forEach(function (c) { h += cfgChip(c[1], c[2], cfg.r3 === c[0], "cfgPick('r3','" + c[0] + "')"); });
+  h += '</div></div>';
+  h += '<div class="round"><div class="round-h">④ 选择套餐内饮料</div><div class="chips">';
+  R4.forEach(function (c) { h += cfgChip(c[1], c[2], cfg.r4 === c[0], "cfgPick('r4','" + c[0] + "')"); });
+  h += '</div>';
+  if (ICE_DRINKS.indexOf(cfg.r4) >= 0) {
+    h += '<div class="mod-h">冰量（必选特制组 · 默认标准）</div><div class="chips">';
+    ["标准", "去冰", "少冰", "多冰"].forEach(function (i) {
+      h += cfgChip(i, 0, cfg.ice === i, "cfgIce('" + i + "')");
+    });
+    h += '</div>';
+  }
+  h += '</div>';
+  document.getElementById("cfgRounds").innerHTML = h;
+  var r2d = 0, r3d = 0, r4d = 0, r2n = "", r3n = "", r4n = "";
+  R2.forEach(function (c) { if (c[0] === cfg.r2) { r2d = c[2]; r2n = c[1]; } });
+  R3.forEach(function (c) { if (c[0] === cfg.r3) { r3d = c[2]; r3n = c[1]; } });
+  R4.forEach(function (c) { if (c[0] === cfg.r4) { r4d = c[2]; r4n = c[1]; } });
+  var food = Math.round((36.9 + r2d + r3d + r4d) * 10) / 10;
+  var all = Math.round((food + 6.0 + 1.9) * 10) / 10;
+  document.getElementById("cfgFood").textContent = "¥" + food.toFixed(1);
+  document.getElementById("cfgAll").textContent = "¥" + all.toFixed(1);
+  var mods = [];
+  if (cfg.sauce) mods.push("辣椒黄油风味酱");
+  if (cfg.lettuce) mods.push("切块生菜");
+  var drink = r4n + (ICE_DRINKS.indexOf(cfg.r4) >= 0 ? "（" + cfg.ice + "）" : "");
+  document.getElementById("cfgSum").textContent =
+    "当前配置：龙焰鸡腿堡（" + (mods.length ? mods.join(" + ") : "去全料") + "）+ " + r2n + " + " + r3n + " + " + drink +
+    " · 确认后按 roundList + modification 传参复价下单";
+}
+function cfgToggle(k) { cfg[k] = !cfg[k]; cfgRender(); }
+function cfgPick(r, code) { cfg[r] = code; if (r === "r4") cfg.ice = "标准"; cfgRender(); }
+function cfgIce(v) { cfg.ice = v; cfgRender(); }
+function cfgReset() { cfg = { sauce: true, lettuce: true, r2: "501205", r3: "901401", r4: "903050", ice: "标准" }; cfgRender(); }
+cfgRender();
 </script>
 </body>
 </html>
