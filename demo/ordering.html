@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>麦门炼金术 · 复刻版点餐台（金谊广场店·麦乐送）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#F5F3EF; color:#26221F; }
+  #app { max-width:520px; margin:0 auto; height:100vh; display:flex; flex-direction:column; background:#fff; box-shadow:0 0 24px rgba(0,0,0,0.06); position:relative; }
+  /* 顶部门店栏 */
+  .top { background:linear-gradient(135deg,#DA291C,#C41E12); color:#fff; padding:14px 16px 12px; flex-shrink:0; }
+  .top .store { font-size:16px; font-weight:800; }
+  .top .meta { font-size:11.5px; opacity:0.85; margin-top:3px; }
+  .top .meta span { background:rgba(255,255,255,0.18); border-radius:4px; padding:1px 6px; margin-right:6px; }
+  /* 主体：左分类 + 右列表 */
+  .body { flex:1; display:flex; overflow:hidden; }
+  .nav { width:86px; background:#F0EDE8; overflow-y:auto; flex-shrink:0; }
+  .nav div { padding:14px 8px; font-size:12.5px; color:#5F5E5A; text-align:center; cursor:pointer; border-left:3px solid transparent; }
+  .nav div.on { background:#fff; color:#DA291C; font-weight:700; border-left-color:#DA291C; }
+  .list { flex:1; overflow-y:auto; padding:0 12px 90px; }
+  .cat-title { font-size:13px; font-weight:700; color:#8A8780; padding:14px 0 8px; }
+  .item { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid #F2EFEA; }
+  .item img, .item .ph { width:74px; height:74px; border-radius:10px; object-fit:cover; flex-shrink:0; background:#F0EDE8; }
+  .item .ph { display:flex; align-items:center; justify-content:center; font-size:26px; color:#C9C4BC; font-weight:800; }
+  .info { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .info .n { font-size:14px; font-weight:600; line-height:1.35; }
+  .info .tg { margin-top:3px; }
+  .info .tg span { display:inline-block; font-size:10.5px; color:#DA291C; background:#FDEEEE; border-radius:4px; padding:1px 5px; margin-right:4px; }
+  .info .p { margin-top:auto; display:flex; align-items:flex-end; justify-content:space-between; }
+  .info .p .pr b { font-size:16px; color:#DA291C; } .info .p .pr s { font-size:11px; color:#B8AFA4; margin-left:4px; }
+  .add { width:30px; height:30px; border-radius:50%; background:#DA291C; color:#fff; font-size:20px; line-height:28px; text-align:center; cursor:pointer; font-weight:700; flex-shrink:0; }
+  .add.mini { font-size:12px; width:auto; height:24px; line-height:24px; border-radius:12px; padding:0 10px; background:#fff; color:#DA291C; border:1px solid #DA291C; }
+  /* 购物车栏 */
+  .cartbar { position:absolute; left:0; right:0; bottom:0; background:#fff; border-top:1px solid #ECE7E0; display:flex; align-items:center; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); z-index:20; }
+  .carticon { position:relative; width:44px; height:44px; border-radius:50%; background:#26221F; color:#FFC72C; display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; margin-right:12px; }
+  .carticon .n { position:absolute; top:-4px; right:-4px; background:#DA291C; color:#fff; font-size:10.5px; min-width:18px; height:18px; line-height:18px; border-radius:9px; text-align:center; font-weight:700; }
+  .carticon.empty { background:#B8AFA4; color:#E8E3DC; } .carticon.empty .n { display:none; }
+  .total { flex:1; }
+  .total b { font-size:20px; color:#DA291C; } .total span { font-size:11px; color:#B8AFA4; margin-left:6px; }
+  .checkout { background:#FFC72C; color:#26221F; font-weight:800; font-size:15px; padding:11px 26px; border-radius:999px; cursor:pointer; text-align:center; }
+  .checkout.off { background:#E8E3DC; color:#B8AFA4; pointer-events:none; }
+  /* 购物车面板 / 套餐面板 / 摘要弹层 */
+  .sheet-mask { position:absolute; inset:0; background:rgba(0,0,0,0.45); z-index:30; display:none; }
+  .sheet { position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:18px 18px 0 0; z-index:31; display:none; max-height:72%; overflow-y:auto; padding:16px 16px calc(20px + env(safe-area-inset-bottom)); }
+  .sheet.open, .sheet-mask.open { display:block; }
+  .sheet h3 { font-size:15px; font-weight:800; margin-bottom:10px; }
+  .ci { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #F5F3EF; }
+  .ci .n { flex:1; font-size:13px; } .ci .n small { display:block; color:#B8AFA4; font-size:11px; }
+  .qty { display:flex; align-items:center; gap:10px; }
+  .qty b { width:26px; height:26px; border-radius:50%; border:1px solid #DA291C; color:#DA291C; text-align:center; line-height:24px; cursor:pointer; font-weight:700; }
+  .qty b.minus { border-color:#B8AFA4; color:#B8AFA4; }
+  .qty span { min-width:18px; text-align:center; font-weight:700; }
+  .sheet .foot { display:flex; justify-content:space-between; align-items:center; margin-top:14px; }
+  .sheet .foot .clear { font-size:12px; color:#B8AFA4; cursor:pointer; }
+  .sheet .foot .go { background:#FFC72C; font-weight:800; padding:10px 24px; border-radius:999px; cursor:pointer; font-size:14px; }
+  .round { margin-bottom:14px; }
+  .round .rh { font-size:12px; font-weight:700; color:#6B655F; margin-bottom:8px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { border:1.5px solid #ECE7E0; border-radius:9px; padding:6px 10px; font-size:12px; cursor:pointer; background:#fff; }
+  .chip.on { border-color:#DA291C; background:#FDEEEE; color:#DA291C; font-weight:700; }
+  .chip .dp { font-size:10.5px; color:#6B655F; } .chip.on .dp { color:#DA291C; }
+  .mod-h { font-size:11px; color:#6B655F; margin:6px 0; }
+  .sumbox { background:#F5F3EF; border-radius:10px; padding:10px 12px; font-size:12px; color:#444; white-space:pre-wrap; line-height:1.6; }
+  .close-x { position:absolute; right:14px; top:14px; font-size:20px; color:#B8AFA4; cursor:pointer; }
+  .note { font-size:11px; color:#B8AFA4; margin-top:8px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top">
+    <div class="store">麦当劳上海浦东三林金谊广场餐厅</div>
+    <div class="meta"><span>麦乐送</span><span>夜市 17:30–23:30 配送中</span><span>数据快照 2026-10-10</span></div>
+  </div>
+  <div class="body">
+    <div class="nav" id="nav"></div>
+    <div class="list" id="list"></div>
+  </div>
+  <div class="cartbar">
+    <div class="carticon empty" id="cartIcon" onclick="toggleCart()">🍟<span class="n" id="cartN">0</span></div>
+    <div class="total"><b id="cartTotal">¥0</b><span>未含配送 6.0 + 打包 1.9</span></div>
+    <div class="checkout off" id="checkout" onclick="openSummary()">去结算</div>
+  </div>
+  <div class="sheet-mask" id="mask" onclick="closeSheets()"></div>
+  <div class="sheet" id="cartSheet">
+    <h3>购物车</h3>
+    <div id="cartItems"></div>
+    <div class="foot"><span class="clear" onclick="clearCart()">🗑 清空</span><span class="go" onclick="closeSheets();openSummary()">生成订单摘要</span></div>
+  </div>
+  <div class="sheet" id="comboSheet"><div class="close-x" onclick="closeSheets()">✕</div><div id="comboBody"></div></div>
+  <div class="sheet" id="summarySheet"><div class="close-x" onclick="closeSheets()">✕</div><h3>订单摘要（模拟 create-order 入参）</h3><div class="sumbox" id="sumBox"></div><div class="note">真实链路：本摘要结构对应 calculate-price 复价 → create-order 建单 → 返回支付链接（支付由用户完成）。本页为数据快照演示，非官方。</div></div>
+</div>
+<script>
+/* ===== 数据快照：2026-10-10 query-meals 实测（金谊广场店·麦乐送） ===== */
+var IMG = "https://menu-img.mcd.cn/pcm/prod/menu/";
+var MENU = [
+ {cat:"人气热卖", items:[
+  {c:"9900016490",n:"龙焰鸡腿堡四件套",p:36.9,o:68.5,i:IMG+"ProductPool/product/MS_9900016490_320.png",tg:["GD联名","可配置"],combo:1},
+  {c:"9900016510",n:"“我就喜欢”鸡薯双全盒",p:15.9,o:31.5,i:IMG+"ProductPool/product/MS_9900016510_320.png",tg:["立省15.6"]},
+  {c:"9900016503",n:"龙焰芝士棒鸡腿堡四件套",p:39.9,o:71.5,i:IMG+"ProductPool/product/MS_9900016503_320.png",tg:["GD联名"],combo:1},
+  {c:"521950",n:"蓝莓爆爆珠麦旋风",p:17,o:17,i:IMG+"ProductPool/product/MS_521950_320.png"},
+  {c:"521954",n:"联名复古棒球帽",p:34.9,o:39.9,i:IMG+"ProductPool/product/MS_521954_320.png",tg:["周边"]}]},
+ {cat:"鸡肉汉堡/卷", items:[
+  {c:"521953",n:"龙焰芝士棒鸡腿堡",p:30,o:30,i:IMG+"ProductPool/product/MS_521953_320.png"},
+  {c:"521952",n:"龙焰鸡腿堡",p:27,o:27,i:IMG+"ProductPool/product/MS_521952_320.png"},
+  {c:"901406",n:"板烧鸡腿堡",p:26.5,o:26.5,i:IMG+"20241008/product/MS_901406_320.png",tg:["畅销"]},
+  {c:"901440",n:"麦辣鸡腿汉堡",p:25.5,o:25.5,i:IMG+"20260325/product/MS_901440_320.png"},
+  {c:"521816",n:"酥酥多笋卷",p:23.5,o:23.5,i:IMG+"ProductPool/product/MS_521816_320.png"},
+  {c:"901450",n:"麦香鸡",p:18,o:18,i:null},
+  {c:"9900002996",n:"板烧鸡腿堡套餐",p:42,o:51.5,i:IMG+"20260824/product/MS_G9900002996_320.png",tg:["外送价"],combo:1},
+  {c:"9900002995",n:"麦辣鸡腿汉堡套餐",p:41,o:50.5,i:IMG+"20260824/product/MS_G9900002995_320.png",tg:["外送价"],combo:1}]},
+ {cat:"巨无霸/牛鱼肉堡", items:[
+  {c:"9900003001",n:"巨无霸套餐",p:44.5,o:54.5,i:IMG+"20260824/product/MS_G9900003001_320.png",tg:["外送价"],combo:1},
+  {c:"901100",n:"巨无霸",p:29,o:29,i:IMG+"20260309/product/MS_901100_320.png",tg:["100%纯牛肉"]},
+  {c:"900138",n:"不素之霸双层牛堡",p:29,o:29,i:IMG+"20260309/product/MS_900138_320.png"},
+  {c:"901106",n:"培根蔬萃双层牛堡",p:27,o:27,i:IMG+"20260309/product/MS_901106_320.png"},
+  {c:"920159",n:"培根芝士双牛堡",p:27,o:27,i:null},
+  {c:"901120",n:"双层吉士汉堡",p:25,o:25,i:IMG+"20260309/product/MS_901120_320.png"},
+  {c:"9900003589",n:"双层深海鳕鱼堡",p:26.5,o:26.5,i:IMG+"ProductPool/product/MS_9900003589_320.png"},
+  {c:"901600",n:"麦香鱼",p:24,o:24,i:IMG+"ProductPool/product/MS_901600_320.png"}]},
+ {cat:"套餐精选", items:[
+  {c:"9900006150",n:"大堡口福四件套",p:34.9,o:67.5,i:IMG+"20260824/product/MS_9900006150_320.gif",tg:["超值","5.2折"],combo:1},
+  {c:"9900006231",n:"大堡口福四件套(培根芝士双牛堡)",p:36.9,o:68.5,i:IMG+"20260824/product/MS_9900006231_320.png",combo:1},
+  {c:"9900006233",n:"大堡口福四件套(双层脆鸡堡)",p:34.9,o:67.5,i:IMG+"20260824/product/MS_9900006233_320.png",combo:1},
+  {c:"9900007762",n:"精选单人餐四件套",p:45.9,o:67.5,i:IMG+"20260101/product/MS_9900007762_320.gif",combo:1},
+  {c:"9900012940",n:"鸡牛堡堡双人餐",p:64.9,o:103,i:IMG+"ProductPool/product/MS_9900012940_320.png"},
+  {c:"9900009251",n:"牛气满满套餐",p:41.5,o:41.5,i:IMG+"ProductPool/product/MS_9900009251_320_1746694044697.png"},
+  {c:"9900011129",n:"“堡”你欢乐套餐(500大卡)",p:35.9,o:35.9,i:IMG+"ProductPool/product/MS_9900011129_320.png",tg:["500大卡"]},
+  {c:"9900011124",n:"“辣”么快乐套餐(500大卡)",p:28.5,o:28.5,i:IMG+"ProductPool/product/MS_9900011124_320.png",tg:["500大卡"]}]},
+ {cat:"炸鸡", items:[
+  {c:"9900013854",n:"麦麦炸鸡5拼",p:39.9,o:57.5,i:IMG+"ProductPool/product/MS_9900013854_320.png",tg:["促销"]},
+  {c:"9900002925",n:"超级翅桶",p:110,o:172,i:IMG+"20260101/product/MS_9900002925_320.png"},
+  {c:"901700",n:"麦辣鸡翅2块",p:16,o:16,i:IMG+"ProductPool/product/MS_901700_320.png"},
+  {c:"521156",n:"那么大鸡排(椒盐)",p:15.5,o:15.5,i:IMG+"20260101/product/MS_521156_320.png"}]},
+ {cat:"小食甜品", items:[
+  {c:"521986",n:"马苏里拉拉丝芝士条",p:11.9,o:17,i:IMG+"ProductPool/product/MS_G9900016516_320.png",tg:["促销"]},
+  {c:"521908",n:"黑洋酥小圆子风味派",p:5,o:10.5,i:IMG+"ProductPool/product/MS_521908_320.png",tg:["促销","今日5元"]},
+  {c:"521901",n:"月下相思扭扭薯",p:17,o:17,i:IMG+"ProductPool/product/MS_521901_320.png",tg:["上新"]},
+  {c:"9900016082",n:"心形薯饼5块",p:16.5,o:16.5,i:IMG+"ProductPool/product/MS_9900016082_320.png",tg:["上新"]},
+  {c:"501205",n:"薯条",p:15.5,o:15.5,i:IMG+"ProductPool/product/MS_501205_320.png"},
+  {c:"901401",n:"麦乐鸡5块",p:15,o:15,i:IMG+"20260529/product/MS_901401_320.png"},
+  {c:"902374",n:"朱古力新地",p:13.5,o:13.5,i:IMG+"ProductPool/product/MS_902374_320.png"},
+  {c:"904106",n:"香芋派",p:9,o:9,i:IMG+"ProductPool/product/MS_G904106_320.png"},
+  {c:"906102",n:"苹果片",p:7.5,o:7.5,i:IMG+"ProductPool/product/MS_906102_320.png"}]},
+ {cat:"饮品", items:[
+  {c:"903050",n:"可口可乐",p:11,o:11,i:IMG+"ProductPool/product/MS_903050_320.png"},
+  {c:"903071",n:"无糖可口可乐",p:11,o:11,i:IMG+"ProductPool/product/MS_G903071_320.png"},
+  {c:"515946",n:"浓浓黑巧(冰/热)",p:13.9,o:21,i:IMG+"20261008/product/MS_G515945_320.gif",tg:["上新"]},
+  {c:"515955",n:"浓浓燕麦黑巧(冰/热)",p:15.9,o:23,i:IMG+"20261008/product/MS_G515954_320.gif"},
+  {c:"520688",n:"大杯鲜萃咖啡",p:13,o:13,i:IMG+"ProductPool/product/MS_520688_320.gif"},
+  {c:"906352",n:"【美汁源】黄金橙橙",p:14,o:14,i:IMG+"20240904/product/MS_906352_320.png"},
+  {c:"507394",n:"牛奶",p:19,o:19,i:IMG+"ProductPool/product/MS_G511186_320.png"}]}
+];
+/* ===== 龙焰四件套可配结构（2026-10-10 query-meal-detail 实测） ===== */
+var DETAIL = {
+ "9900016490": { rounds:[
+  {name:"① 主堡", fixed:"龙焰鸡腿堡【全料】", mods:[{k:"辣椒黄油风味酱",def:1},{k:"切块生菜",def:1}], note:"点选即移除，最多保留2项"},
+  {name:"② 小食一", choices:[["501205","中薯条",0],["521986","芝士条",1.5],["521983","心形薯饼+韩式酱",1],["903420","脆脆薯条",2],["501206","大薯条",2],["904437","玉米杯(小)",-1]], def:"501205"},
+  {name:"③ 小食二", choices:[["901401","麦乐鸡5块",0],["920359","韩式脆汁鸡腿",4],["920360","韩式鸡柳",3.5],["901700","麦辣鸡翅2块",1],["920123","薄皮V翅",2],["521823","鸡柳3根",0.5],["900943","琵琶腿",1]], def:"901401"},
+  {name:"④ 饮料", choices:[["903050","可乐(中)",0],["903060","雪碧(中)",0],["903071","无糖可乐",0],["903418","柠檬红茶",0],["903495","怡泉+C",1.5],["906352","黄金橙橙",3],["521327","鲜萃冰咖",2],["507368","热美式",8],["507409","冰奶铁",10],["903755","纯牛奶",0.5],["901027","苹果汁",2],["903505","锡兰红茶",1]], def:"903050", ice:true}
+ ]}};
+/* ===== 状态 ===== */
+var cart = {}, curCombo = null, curCfg = {};
+var DELIVERY = 6.0, PACKING = 1.9;
+/* ===== 渲染 ===== */
+function renderNav() {
+  document.getElementById("nav").innerHTML = MENU.map(function (c, i) {
+    return '<div class="' + (i === 0 ? "on" : "") + '" data-i="' + i + '" onclick="jump(' + i + ')">' + c.cat + '</div>';
+  }).join("");
+}
+function renderList() {
+  document.getElementById("list").innerHTML = MENU.map(function (c, i) {
+    return '<div class="cat-title" id="cat' + i + '">' + c.cat + '</div>' + c.items.map(function (it) {
+      var img = it.i ? '<img src="' + it.i + '" loading="lazy" onerror="this.outerHTML=\'<div class=ph>' + it.n.charAt(0) + '</div>\'">'
+                     : '<div class="ph">' + it.n.charAt(0) + '</div>';
+      var tags = (it.tg || []).map(function (t) { return "<span>" + t + "</span>"; }).join("");
+      var btn = it.combo ? '<div class="add mini" onclick="openCombo(\'' + it.c + '\')">选配</div>'
+                         : '<div class="add" onclick="addSimple(\'' + it.c + '\')">+</div>';
+      return '<div class="item">' + img + '<div class="info"><div class="n">' + it.n + '</div><div class="tg">' + tags + '</div>' +
+             '<div class="p"><div class="pr"><b>¥' + it.p.toFixed(1) + '</b><s>¥' + it.o.toFixed(1) + '</s></div>' + btn + '</div></div></div>';
+    }).join("");
+  }).join("");
+}
+function findItem(code) {
+  for (var i = 0; i < MENU.length; i++) for (var j = 0; j < MENU[i].items.length; j++)
+    if (MENU[i].items[j].c === code) return MENU[i].items[j];
+  return null;
+}
+function jump(i) {
+  document.querySelectorAll("#nav div").forEach(function (d, k) { d.className = k === i ? "on" : ""; });
+  document.getElementById("cat" + i).scrollIntoView({ behavior: "smooth", block: "start" });
+}
+/* ===== 购物车 ===== */
+function addItem(code, name, price, qty, cfgText) {
+  var key = code + "|" + (cfgText || "");
+  if (!cart[key]) cart[key] = { name: name, price: price, qty: 0, cfg: cfgText || "" };
+  cart[key].qty += (qty || 1);
+  renderCart();
+}
+function addSimple(code) {
+  var it = findItem(code);
+  addItem(code, it.n, it.p, 1, "");
+  bump();
+}
+function chQty(key, d) {
+  cart[key].qty += d;
+  if (cart[key].qty <= 0) delete cart[key];
+  renderCart(); renderCartItems();
+}
+function clearCart() { cart = {}; renderCart(); renderCartItems(); }
+function cartCount() { var n = 0; for (var k in cart) n += cart[k].qty; return n; }
+function cartFood() { var t = 0; for (var k in cart) t += cart[k].price * cart[k].qty; return Math.round(t * 10) / 10; }
+function renderCart() {
+  var n = cartCount(), f = cartFood();
+  document.getElementById("cartN").textContent = n;
+  document.getElementById("cartTotal").textContent = "¥" + f.toFixed(1);
+  document.getElementById("cartIcon").className = "carticon" + (n ? "" : " empty");
+  document.getElementById("checkout").className = "checkout" + (n ? "" : " off");
+}
+function bump() {
+  var ic = document.getElementById("cartIcon");
+  ic.style.transform = "scale(1.15)"; setTimeout(function () { ic.style.transform = ""; }, 120);
+}
+function toggleCart() {
+  if (!cartCount()) return;
+  renderCartItems();
+  document.getElementById("cartSheet").classList.add("open");
+  document.getElementById("mask").classList.add("open");
+}
+function renderCartItems() {
+  document.getElementById("cartItems").innerHTML = Object.keys(cart).map(function (k) {
+    var it = cart[k];
+    return '<div class="ci"><div class="n">' + it.name + (it.cfg ? '<small>' + it.cfg + '</small>' : '') + '</div>' +
+      '<div class="qty"><b class="minus" onclick="chQty(\'' + k.replace(/"/g, "&quot;") + '\',-1)">−</b><span>' + it.qty + '</span><b onclick="chQty(\'' + k.replace(/"/g, "&quot;") + '\',1)">+</b></div>' +
+      '<div style="font-size:13px;font-weight:700;min-width:52px;text-align:right;">¥' + (it.price * it.qty).toFixed(1) + '</div></div>';
+  }).join("");
+}
+function closeSheets() {
+  document.querySelectorAll(".sheet,.sheet-mask").forEach(function (e) { e.classList.remove("open"); });
+}
+/* ===== 套餐配置（真实结构） ===== */
+function openCombo(code) {
+  var it = findItem(code);
+  if (!DETAIL[code]) {
+    addItem(code, it.n, it.p, 1, "默认配置");
+    closeSheets(); bump();
+    return;
+  }
+  curCombo = code; curCfg = {};
+  var d = DETAIL[code];
+  d.rounds.forEach(function (r, ri) {
+    if (r.choices) curCfg["r" + ri] = r.def;
+    if (r.mods) r.mods.forEach(function (m, mi) { curCfg["m" + ri + mi] = m.def; });
+  });
+  renderCombo();
+  document.getElementById("comboSheet").classList.add("open");
+  document.getElementById("mask").classList.add("open");
+}
+function renderCombo() {
+  var it = findItem(curCombo), d = DETAIL[curCombo];
+  var extra = 0, lines = [];
+  var h = '<h3>' + it.n + ' <span style="font-size:12px;color:#DA291C;">¥' + it.p.toFixed(1) + '（原 ' + it.o.toFixed(1) + '）</span></h3>';
+  d.rounds.forEach(function (r, ri) {
+    h += '<div class="round"><div class="rh">' + r.name + '</div>';
+    if (r.choices) {
+      h += '<div class="chips">';
+      r.choices.forEach(function (c) {
+        h += '<div class="chip' + (curCfg["r" + ri] === c[0] ? " on" : "") + '" onclick="setR(' + ri + ',\'' + c[0] + '\')">' + c[1] +
+             (c[2] ? '<span class="dp"> ' + (c[2] > 0 ? "+" : "") + c[2] + ' 元</span>' : '') + '</div>';
+        if (curCfg["r" + ri] === c[0]) { extra += c[2]; lines.push(c[1]); }
+      });
+      h += '</div>';
+    }
+    if (r.mods) {
+      h += '<div class="chips">';
+      r.mods.forEach(function (m, mi) {
+        h += '<div class="chip' + (curCfg["m" + ri + mi] ? " on" : "") + '" onclick="setM(' + ri + ',' + mi + ')">' + m.k + '</div>';
+        if (curCfg["m" + ri + mi]) lines.push(m.k);
+      });
+      h += '</div><div class="mod-h">默认全料，点击移除</div>';
+    }
+    h += '</div>';
+  });
+  h += '<div class="foot" style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">' +
+       '<span style="font-size:12px;color:#6B655F;">默认配置 +¥0 · 换选差价已计入</span>' +
+       '<span class="go" onclick="addCombo()">加入购物车</span></div>';
+  h += '<div class="sumbox" style="margin-top:10px;">配置：' + it.n.replace("四件套", "") + "（" + (lines.join(" + ") || "默认") + "）</div>";
+  document.getElementById("comboBody").innerHTML = h;
+  curCfg._extra = extra; curCfg._lines = lines.join(" + ");
+}
+function setR(ri, code) { curCfg["r" + ri] = code; renderCombo(); }
+function setM(ri, mi) { curCfg["m" + ri + mi] = curCfg["m" + ri + mi] ? 0 : 1;
+  var d = DETAIL[curCombo], on = 0;
+  d.rounds[ri].mods.forEach(function (m, mi2) { if (curCfg["m" + ri + mi2]) on++; });
+  if (on > 2) curCfg["m" + ri + mi] = 0;
+  renderCombo();
+}
+function addCombo() {
+  var it = findItem(curCombo);
+  var price = Math.round((it.p + (curCfg._extra || 0)) * 10) / 10;
+  addItem(curCombo, it.n, price, 1, curCfg._lines || "默认配置");
+  closeSheets(); bump();
+}
+/* ===== 摘要 ===== */
+function openSummary() {
+  if (!cartCount()) return;
+  var f = cartFood(), lines = Object.keys(cart).map(function (k) {
+    return "· " + cart[k].name + (cart[k].cfg ? "（" + cart[k].cfg + "）" : "") + " ×" + cart[k].qty + " = ¥" + (cart[k].price * cart[k].qty).toFixed(1);
+  });
+  document.getElementById("sumBox").textContent =
+    "配送地址：上海市浦东新区三林镇（金谊广场店配送）\n" + lines.join("\n") +
+    "\n商品小计 ¥" + f.toFixed(1) + " + 配送 ¥6.0 + 打包 ¥1.9 = 合计 ¥" + (f + 7.9).toFixed(1) +
+    "\n\n真实链路：roundList/modification → calculate-price 复价 → create-order → 支付链接（用户支付）";
+  document.getElementById("summarySheet").classList.add("open");
+  document.getElementById("mask").classList.add("open");
+}
+/* ===== init ===== */
+renderNav(); renderList(); renderCart();
+</script>
+</body>
+</html>
