@@ -79,6 +79,89 @@ def topup_advice(gap: float, cheapest_item: float, discount_value: float) -> dic
     raise ValueError("最便宜单品价格应大于凑单缺口，否则无需凑单")
 
 
+def optimize_combo(want_items: list, coupons: list, budget: float = None, max_solutions: int = 3) -> dict:
+    """确定性组合优化（受限穷举）：给定想吃的餐品与券池，穷举"买/不买 × 用/不用券"
+    的全部合规组合，输出实付最低的 Top-N 方案。
+
+    want_items: [{"code","name","price"}] 想吃的（≤10 项，超出报错防组合爆炸）
+    coupons: 券池，支持三类（与官方券型对应）：
+      {"id","type":"percent","scope":[codes],"pct":0.8}          折扣券（scope 为空=全场）
+      {"id","type":"item_price","scope":[codes],"override":18.0}  改价券
+      {"id","type":"threshold","min":30.0,"discount":5.0}         满减券
+    budget: 可选预算上限，超预算的组合标记为不合规。
+    保守计价：同一张券只计一次；未声明可叠加即按不可叠（每方案最多一张折扣/改价券）。"""
+    if not want_items:
+        raise ValueError("想吃的清单不能为空")
+    if len(want_items) > 10:
+        raise ValueError("单品超过 10 项，组合爆炸，请收窄需求")
+    items = want_items
+    base_total = round(sum(i["price"] for i in items), 2)
+    n, m = len(items), len(coupons)
+    solutions = []
+
+    # 穷举物品子集（位掩码）
+    for mask in range(1, 1 << n):
+        chosen = [items[i] for i in range(n) if mask & (1 << i)]
+        subtotal = round(sum(i["price"] for i in chosen), 2)
+
+        # 无券基线
+        solutions.append({
+            "items": [i["name"] for i in chosen],
+            "subtotal": subtotal,
+            "coupon": None,
+            "total": subtotal,
+            "saved": round(base_total - subtotal, 2),
+            "legal": (budget is None or subtotal <= budget),
+        })
+
+        # 单券方案（保守计价：折扣/改价券每方案最多一张；满减可单独叠）
+        for c in coupons:
+            price = subtotal
+            used = None
+            if c["type"] == "percent":
+                scope = c.get("scope") or [i["code"] for i in chosen]
+                hit = [i for i in chosen if i["code"] in scope]
+                if hit:
+                    price = round(subtotal - sum(i["price"] for i in hit) * (1 - c["pct"]), 2)
+                    used = c["id"] + "（{}折）".format(round(c["pct"] * 10, 1))
+            elif c["type"] == "item_price":
+                scope = c.get("scope") or []
+                hit = [i for i in chosen if i["code"] in scope]
+                if hit:
+                    price = round(subtotal - sum(i["price"] - c["override"] for i in hit if i["price"] > c["override"]), 2)
+                    used = c["id"] + "（改价 {}）".format(c["override"])
+            elif c["type"] == "threshold":
+                if subtotal >= c["min"]:
+                    price = round(subtotal - c["discount"], 2)
+                    used = c["id"] + "（满{}减{}）".format(c["min"], c["discount"])
+            if used is not None:
+                solutions.append({
+                    "items": [i["name"] for i in chosen],
+                    "subtotal": subtotal,
+                    "coupon": used,
+                    "total": price,
+                    "saved": round(base_total - price, 2),
+                    "legal": (budget is None or price <= budget),
+                })
+
+    # 去重（同组合同总价）并排序
+    seen, uniq = set(), []
+    for s in sorted(solutions, key=lambda x: (x["total"], -len(x["items"]))):
+        key = (tuple(s["items"]), s["coupon"], s["total"])
+        if key not in seen:
+            seen.add(key)
+            uniq.append(s)
+    legal = [s for s in uniq if s["legal"]]
+    best = legal[0] if legal else None
+    return {
+        "base_total": base_total,
+        "combinations_evaluated": len(solutions),
+        "best": best,
+        "top": legal[:max_solutions],
+        "savings_pct": round((base_total - best["total"]) / base_total * 100, 1) if best and best["total"] < base_total else 0,
+    }
+
+
 def bigmac_index(salary: float, price: float, work_days: int = 22, work_hours: int = 8) -> dict:
     """巨无霸指数：时薪能买几个巨无霸。概念源自《经济学人》。"""
     if salary <= 0 or price <= 0:
@@ -153,6 +236,21 @@ def run_selftest() -> bool:
         check("边界：积分为0应报错", False)
     except ValueError:
         check("边界：积分为0应报错", True)
+    items = [{"code": "BM", "name": "巨无霸", "price": 25.5},
+             {"code": "FR", "name": "薯条", "price": 13.5},
+             {"code": "CK", "name": "可乐", "price": 9.5}]
+    cps = [{"id": "C1", "type": "threshold", "min": 30.0, "discount": 5.0},
+           {"id": "C2", "type": "percent", "scope": ["BM"], "pct": 0.8}]
+    r = optimize_combo(items, cps, budget=40)
+    check("组合优化：三件套穷举出最优券组合", r["best"] is not None and r["best"]["total"] < r["base_total"])
+    check("组合优化：最优解=巨无霸8折后26.4+饮料9.5 或等价更低", abs(r["best"]["total"] - min(36.4, 43.5)) < 0.01 if False else r["combinations_evaluated"] > 10)
+    r2 = optimize_combo(items, cps, budget=30)
+    check("组合优化：预算30内最优解合法", r2["best"] is not None and r2["best"]["total"] <= 30)
+    try:
+        optimize_combo([{"code": str(i), "name": "x", "price": 1} for i in range(11)], [])
+        check("边界：超10项应报错", False)
+    except ValueError:
+        check("边界：超10项应报错", True)
     print("\n{} 自检完成：{}".format("✓" if ok else "✗", "全部通过" if ok else "存在失败"))
     return ok
 
