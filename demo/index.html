@@ -140,6 +140,14 @@
 </div>
 
 <!-- ② 点餐代理 -->
+<h2><span class="no">①-B</span>全国巨无霸指数 · 十城实测</h2>
+<div class="desc">2026-10-19 用官方 MCP 逐一实测十座城市核心商圈门店（巨无霸单品）。最贵与最便宜差 <b style="color:var(--red)">3.5 元（13.7%）</b>——同样的汉堡，不同的价格：</div>
+<div class="card">
+  <div id="cityRank"></div>
+  <div class="verdict" style="margin-top:10px;">发现①：最贵的巨无霸在<b>重庆解放碑</b>（29 元），不在北上广——一线城市反而是全国便宜档。<br>发现②：套餐价差远大于单品——巨无霸三件套重庆 54.5 元 vs 广州 36.5 元，<b style="color:var(--red)">差 18 元（49%）</b>。在贵的城市点套餐，溢价被放大 5 倍。</div>
+  <div class="fine" style="margin-top:8px;">取样门店价（每城 1 家核心商圈门店），价格有时效与门店差异；复现方法见仓库 docs/data-snapshots/。</div>
+</div>
+
 <h2><span class="no">②</span>点餐代理 · 全自主点餐（深夜场景实录）</h2>
 <div class="desc">能力全天候通吃（早餐/午餐/下午茶/晚餐/宵夜），下面是它最出彩档期的实录重放：23 点的加班夜，一句话，AI 跑完全链路（徽章 = 实际调用的 MCP 工具）：</div>
 <div class="card">
@@ -521,6 +529,26 @@ function cfgPick(r, code) { cfg[r] = code; if (r === "r4") cfg.ice = "标准"; c
 function cfgIce(v) { cfg.ice = v; cfgRender(); }
 function cfgReset() { cfg = { sauce: true, lettuce: true, r2: "501205", r3: "901401", r4: "903050", ice: "标准" }; cfgRender(); }
 cfgRender();
+
+/* ---------- 全国巨无霸指数榜 ---------- */
+var CITY_BIGMAC = [["重庆 解放碑",29.0,54.5],["北京 王府井",26.5,37.5],["深圳 华强北",26.5,36.5],["武汉 江汉路",26.5,36.5],["哈尔滨 中央大街",26.5,37.5],["乌鲁木齐 友好奥莱",26.5,41.0],["成都 春熙路",26.0,37.0],["上海 人民广场",25.5,36.5],["广州 沿江中路",25.5,36.5],["西安 钟鼓楼",25.5,37.5]];
+(function(){
+  var max = 29.0, min = 25.5, h = "";
+  CITY_BIGMAC.forEach(function(c){
+    var pct = Math.round((c[1]/max)*100);
+    var hot = c[1] === max;
+    var cheap = c[1] === min;
+    h += '<div style="display:flex;align-items:center;gap:8px;margin:7px 0;">'
+       + '<div style="width:118px;font-size:12.5px;color:var(--sub);text-align:right;">' + c[0] + '</div>'
+       + '<div style="flex:1;background:#F0EDE8;border-radius:6px;height:22px;overflow:hidden;">'
+       + '<div style="width:' + pct + '%;height:100%;background:' + (hot ? 'var(--red)' : (cheap ? 'var(--green)' : '#EFA83C')) + ';border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:11.5px;font-weight:700;">¥' + c[1].toFixed(1) + '</div>'
+       + '</div>'
+       + '<div style="width:76px;font-size:11px;color:var(--sub);">三件套 ¥' + c[2].toFixed(1) + '</div>'
+       + '</div>';
+  });
+  var el = document.getElementById('cityRank');
+  if (el) el.innerHTML = h + '<div style="font-size:11px;color:var(--sub);margin-top:6px;">■ 红=全国最贵 ■ 绿=全国最低 ■ 黄=中间档</div>';
+})();
 </script>
 </body>
 </html>
