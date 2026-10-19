@@ -3,7 +3,11 @@
 > 把每一块钱、每一分积分、每一个深夜的饥饿感，都安排得明明白白。
 > 基于麦当劳官方 MCP（mcd-order）的全场景消费副驾驶 —— 三大模式，三种人群，一个 Skill。
 
+> **炼的不是金，是每一块钱和每一分积分的确定性。**
+
 ![麦门炼金术](docs/assets/banner.png)
+
+![原理：所有结论都是算出来的](docs/assets/how-it-works.png)
 
 ![MCP 工具](https://img.shields.io/badge/MCP_工具-16个全链路实测-D9541E) ![在线演示](https://img.shields.io/badge/在线演示-打开即玩-3B6D11) ![自动化](https://img.shields.io/badge/每日简报-四通道推送-185FA5) ![WorkBuddy](https://img.shields.io/badge/WorkBuddy-零代码复刻-854F0B)
 

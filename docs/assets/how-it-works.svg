@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="640" viewBox="0 0 1080 640">
+  <rect width="1080" height="640" fill="#FBF8F4"/>
+  <text x="54" y="72" font-family="-apple-system,PingFang SC,sans-serif" font-size="15" font-weight="600" fill="#DA291C" letter-spacing="2">MCD-ALCHEMY · 麦门炼金术</text>
+  <text x="54" y="126" font-family="-apple-system,PingFang SC,sans-serif" font-size="44" font-weight="800" fill="#26221F">所有结论，都是算出来的</text>
+  <text x="54" y="166" font-family="-apple-system,PingFang SC,sans-serif" font-size="18" fill="#6B655F">确定性算账，不靠大模型口算 —— 每一个数字可复现、可核验</text>
+
+  <!-- 五步流程 -->
+  <g font-family="-apple-system,PingFang SC,sans-serif">
+    <!-- step cards -->
+    <g>
+      <rect x="54" y="210" width="180" height="180" rx="14" fill="#FFFFFF" stroke="#ECE7E0" stroke-width="1.5"/>
+      <rect x="54" y="210" width="180" height="6" rx="3" fill="#DA291C"/>
+      <text x="70" y="248" font-size="13" font-weight="700" fill="#DA291C">1</text>
+      <text x="88" y="248" font-size="16" font-weight="700" fill="#26221F">你说需求</text>
+      <text x="70" y="278" font-size="13" fill="#6B655F">"30 块安排晚饭"</text>
+      <text x="70" y="300" font-size="13" fill="#6B655F">预算 / 口味 / 低卡</text>
+      <text x="70" y="322" font-size="13" fill="#6B655F">深夜 / 加班场景</text>
+      <text x="70" y="362" font-size="11" fill="#B8AFA4">自然语言 → 结构化</text>
+    </g>
+    <g>
+      <rect x="272" y="210" width="180" height="180" rx="14" fill="#FFFFFF" stroke="#ECE7E0" stroke-width="1.5"/>
+      <rect x="272" y="210" width="180" height="6" rx="3" fill="#FFC72C"/>
+      <text x="288" y="248" font-size="13" font-weight="700" fill="#BA7517">2</text>
+      <text x="306" y="248" font-size="16" font-weight="700" fill="#26221F">MCP 取数</text>
+      <text x="288" y="278" font-size="13" fill="#6B655F">菜单 · 券池 · 营养</text>
+      <text x="288" y="300" font-size="13" fill="#6B655F">十城价格 · 抽奖奖池</text>
+      <text x="288" y="322" font-size="13" fill="#6B655F">16 个工具全链路</text>
+      <text x="288" y="362" font-size="11" fill="#B8AFA4">实时数据 · 官方接口</text>
+    </g>
+    <g>
+      <rect x="490" y="210" width="180" height="180" rx="14" fill="#FFFFFF" stroke="#ECE7E0" stroke-width="1.5"/>
+      <rect x="490" y="210" width="180" height="6" rx="3" fill="#185FA5"/>
+      <text x="506" y="248" font-size="13" font-weight="700" fill="#185FA5">3</text>
+      <text x="524" y="248" font-size="16" font-weight="700" fill="#26221F">归一化</text>
+      <text x="506" y="278" font-size="13" fill="#6B655F">menu / coupons JSON</text>
+      <text x="506" y="300" font-size="13" fill="#6B655F">数据与逻辑分离</text>
+      <text x="506" y="340" font-size="11" fill="#B8AFA4">输入契约可复核</text>
+    </g>
+    <g>
+      <rect x="708" y="206" width="180" height="188" rx="14" fill="#FFFFFF" stroke="#DA291C" stroke-width="2.5"/>
+      <rect x="708" y="206" width="180" height="6" rx="3" fill="#DA291C"/>
+      <text x="724" y="244" font-size="13" font-weight="700" fill="#DA291C">4</text>
+      <text x="742" y="244" font-size="16" font-weight="700" fill="#26221F">确定性算账引擎</text>
+      <text x="724" y="274" font-size="13" fill="#6B655F">价值率 · 保底速算</text>
+      <text x="724" y="296" font-size="13" fill="#6B655F">券体检 · 组合优化</text>
+      <text x="724" y="318" font-size="13" fill="#6B655F">十城对比 · 凑单建议</text>
+      <rect x="724" y="334" width="148" height="40" rx="8" fill="#26221F"/>
+      <text x="798" y="351" font-size="11.5" font-weight="700" fill="#FFC72C" text-anchor="middle">calculator.py</text>
+      <text x="798" y="367" font-size="11.5" font-weight="700" fill="#FFC72C" text-anchor="middle">16 tests passed</text>
+    </g>
+    <g>
+      <rect x="926" y="210" width="120" height="180" rx="14" fill="#FFFFFF" stroke="#ECE7E0" stroke-width="1.5"/>
+      <rect x="926" y="210" width="120" height="6" rx="3" fill="#3B6D11"/>
+      <text x="942" y="248" font-size="13" font-weight="700" fill="#3B6D11">5</text>
+      <text x="960" y="248" font-size="16" font-weight="700" fill="#26221F">讲方案</text>
+      <text x="942" y="278" font-size="13" fill="#6B655F">Agent 讲人话</text>
+      <text x="942" y="300" font-size="13" fill="#6B655F">对比表 + 图</text>
+      <text x="942" y="322" font-size="13" fill="#6B655F">确认后下单</text>
+      <text x="942" y="362" font-size="11" fill="#B8AFA4">方案 = 实付</text>
+    </g>
+    <path d="M 238 300 L 268 300" stroke="#B8AFA4" stroke-width="2" marker-end="url(#arr)"/>
+    <path d="M 456 300 L 486 300" stroke="#B8AFA4" stroke-width="2" marker-end="url(#arr)"/>
+    <path d="M 674 300 L 704 300" stroke="#B8AFA4" stroke-width="2" marker-end="url(#arr)"/>
+    <path d="M 892 300 L 922 300" stroke="#B8AFA4" stroke-width="2" marker-end="url(#arr)"/>
+  </g>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#B8AFA4"/>
+    </marker>
+  </defs>
+
+  <!-- 底部深色对比条 -->
+  <rect x="54" y="430" width="992" height="150" rx="18" fill="#26221F"/>
+  <text x="90" y="470" font-size="13" fill="#8A8378">示例 · 积分抽奖值不值</text>
+  <text x="90" y="522" font-size="30" font-weight="700" fill="#6B655F">凭感觉：纯拼脸</text>
+  <text x="380" y="512" font-size="28" fill="#FFC72C">⟶</text>
+  <text x="440" y="470" font-size="13" fill="#8A8378">炼金术 · 保底速算</text>
+  <text x="440" y="524" font-size="34" font-weight="800" fill="#FFC72C">最差也 +6 分<tspan font-size="16" fill="#8A8378" font-weight="400">（成本 24 vs 最低确定奖 30）</tspan></text>
+  <rect x="856" y="466" width="156" height="76" rx="12" fill="#1A7F37"/>
+  <text x="934" y="498" font-size="13" fill="#CFE8C5" text-anchor="middle">每一步可复现</text>
+  <text x="934" y="524" font-size="15" font-weight="800" fill="#FFFFFF" text-anchor="middle">16 tests passed</text>
+  <text x="54" y="614" font-size="12" fill="#B8AFA4">示例数据快照 2026-10-19，实际价格与券可用性以每次 MCP 实时返回为准 · github.com/daxian78/mcd-alchemy</text>
+</svg>
